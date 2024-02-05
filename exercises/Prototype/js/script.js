@@ -30,6 +30,8 @@ let player = {
     col: 5
 };
 
+let fallingSquare = [];
+
 
 
 /**
@@ -50,6 +52,9 @@ function setup() {
     speechRecognizer.onResult = handleResult;
     speechRecognizer.continuous = true;
     speechRecognizer.start();
+    for (let i = 0; i < 2; i++) {
+        fallingSquare.push(new FallingSquare());
+    }
 
 }
 
@@ -61,6 +66,10 @@ function draw() {
     background(bgc.red, bgc.green, bgc.blue);
     displayWorld();
     displayPlayer();
+    for (let i = 0; i < fallingSquare.length; i++) {
+        fallingSquare[i].update();
+        fallingSquare[i].display();
+    }
 }
 
 function displayWorld() {
@@ -138,6 +147,10 @@ function handleResult() {
             bgc.red = 0;
             bgc.blue = 255;
             break;
+        case "white":
+            bgc.green = 255;
+            bgc.red = 255;
+            bgc.blue = 255;
     }
     let nextPosition = {
         row: player.row + move.row,
