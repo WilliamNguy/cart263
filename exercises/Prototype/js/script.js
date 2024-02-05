@@ -26,7 +26,7 @@ let world = [
 ];
 
 let player = {
-    row: 5,
+    row: 9,
     col: 5
 };
 
@@ -69,6 +69,15 @@ function draw() {
     for (let i = 0; i < fallingSquare.length; i++) {
         fallingSquare[i].update();
         fallingSquare[i].display();
+
+        if (collideSquare(
+            player.col * TILE_SIZE, player.row * TILE_SIZE, TILE_SIZE, TILE_SIZE,
+            fallingSquare[i].col * TILE_SIZE, fallingSquare[i].row * TILE_SIZE, TILE_SIZE, TILE_SIZE,
+        )) {
+            bgc.green = 0;
+            bgc.red = 255;
+            bgc.blue = 0;
+        }
     }
 }
 
@@ -168,4 +177,8 @@ function handleResult() {
     if (currentSpeech == "slower") {
         speed--;
     }
+}
+
+function collideSquare(x1, y1, w1, h1, x2, y2, w2, h2) {
+    return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
 }
