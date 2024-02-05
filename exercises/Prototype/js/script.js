@@ -1,12 +1,34 @@
-/**
-Title of Project
-Author Name
-
-This is a template. You must fill in the title,
-author, and this description to match your project!
-*/
-
 "use strict";
+
+let voice = new p5.Speech()
+let speechRecognizer = new p5.SpeechRec();
+let currentSpeech = "Here we go!";
+let bgc = {
+    red: 255,
+    green: 255,
+    blue: 255
+};
+let speed = 1;
+
+let world = [
+    [`W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`]
+    [`W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`]
+];
+
+let player = {
+    row: 5,
+    col: 5
+};
+
 
 
 /**
