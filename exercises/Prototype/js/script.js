@@ -79,6 +79,17 @@ function setup() {
 Description of draw()
 */
 function draw() {
+    if (currentWorld === world2) {
+        bgc.red = 0;
+        bgc.green = 255;
+        bgc.blue = 0;
+    }
+    else {
+        bgc.red = 255;
+        bgc.green = 255;
+        bgc.blue = 255;
+    }
+
     background(bgc.red, bgc.green, bgc.blue);
     displayWorld();
     displayPlayer();
@@ -192,7 +203,7 @@ function handleResult() {
     };
 
     if (nextPosition.row >= 0 && nextPosition.row < currentWorld.length && nextPosition.col >= 0 && nextPosition.col < currentWorld[0].length) {
-        if (world[nextPosition.row][nextPosition.col] !== `W`) {
+        if (currentWorld[nextPosition.row][nextPosition.col] !== `W`) {
             player.row = nextPosition.row;
             player.col = nextPosition.col;
         }
