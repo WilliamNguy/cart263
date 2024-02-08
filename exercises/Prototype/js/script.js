@@ -25,6 +25,22 @@ let world = [
     [`W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`],
 ];
 
+let world2 = [
+    [`W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, ` `, ` `, ` `, ` `, ` `, ` `, ` `, ` `, `W`],
+    [`W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`, `W`],
+];
+
+let currentWorld = world;
+
 let player = {
     row: 9,
     col: 5
@@ -126,6 +142,15 @@ function handleResult() {
         currentSpeech = speechRecognizer.resultString;
         console.log("heard something");
         console.log(speechRecognizer.resultString)
+
+        if (currentSpeech === "switch level") {
+            if (currentWorld === world) {
+                currentWorld = world2;
+            }
+            else {
+                currentWorld = world;
+            }
+        }
     }
 
     switch (currentSpeech) {
@@ -166,9 +191,11 @@ function handleResult() {
         col: player.col + move.col
     };
 
-    if (world[nextPosition.row][nextPosition.col] !== `W`) {
-        player.row = nextPosition.row;
-        player.col = nextPosition.col;
+    if (nextPosition.row >= 0 && nextPosition.row < currentWorld.length && nextPosition.col >= 0 && nextPosition.col < currentWorld[0].length) {
+        if (world[nextPosition.row][nextPosition.col] !== `W`) {
+            player.row = nextPosition.row;
+            player.col = nextPosition.col;
+        }
     }
 
     if (currentSpeech == "faster") {
