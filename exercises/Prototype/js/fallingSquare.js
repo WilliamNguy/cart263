@@ -17,7 +17,7 @@ class FallingSquare {
         let x = this.col * TILE_SIZE;
         let y = this.row * TILE_SIZE;
         push();
-        fill(0, 0, 255);
+        fill(32, 194, 14);
         rect(x, y, TILE_SIZE);
         pop();
     }
