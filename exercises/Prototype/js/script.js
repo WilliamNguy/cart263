@@ -139,9 +139,9 @@ function draw() {
             player.col * TILE_SIZE, player.row * TILE_SIZE, TILE_SIZE, TILE_SIZE,
             fallingSquare[i].col * TILE_SIZE, fallingSquare[i].row * TILE_SIZE, TILE_SIZE, TILE_SIZE,
         )) {
-            bgc.green = 0;
-            bgc.red = 255;
-            bgc.blue = 0;
+            bgc.green = 32;
+            bgc.red = 194;
+            bgc.blue = 14;
         }
     }
 }
