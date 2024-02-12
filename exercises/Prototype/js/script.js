@@ -69,14 +69,16 @@ let world2 = [
 let currentWorld = world;
 
 let player = {
-    row: 9,
-    col: 5
+    row: 35,
+    col: 2
 };
 
 let fallingSquare = [];
 let lastSpawnTime = 0;
 let earlySpawn = 500;
 let lateSpawn = 2000;
+let isGoing = false;
+let intervalId = null;
 
 
 
@@ -199,6 +201,7 @@ function handleResult() {
         }
     }
 
+
     switch (currentSpeech) {
         case "left":
             move.col = -speed;
@@ -231,18 +234,44 @@ function handleResult() {
             bgc.green = 255;
             bgc.red = 255;
             bgc.blue = 255;
+        case "shoot right":
+            move.row = -2;
+            move.col = 2;
+            break;
+        case "shoot left":
+            move.row = -2;
+            move.col = -2;
+            break;
+        case "go":
+            isGoing = true;
+            if (!intervalId) {
+                intervalId = setInterval(moveRight, 1000);
+            }
+            break;
+        case "stop":
+            isGoing = false;
+            clearInterval(intervalId);
+            intervalId = null;
+            break;
     }
+
+
     let nextPosition = {
         row: player.row + move.row,
         col: player.col + move.col
     };
 
-    if (nextPosition.row >= 0 && nextPosition.row < currentWorld.length && nextPosition.col >= 0 && nextPosition.col < currentWorld[0].length) {
+    if (nextPosition.row >= 0 &&
+        nextPosition.row < currentWorld.length &&
+        nextPosition.col >= 0 &&
+        nextPosition.col < currentWorld[0].length) {
+
         if (currentWorld[nextPosition.row][nextPosition.col] !== `W`) {
             player.row = nextPosition.row;
             player.col = nextPosition.col;
         }
     }
+
 
     if (currentSpeech == "faster") {
         speed++;
@@ -254,4 +283,28 @@ function handleResult() {
 
 function collideSquare(x1, y1, w1, h1, x2, y2, w2, h2) {
     return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2;
+}
+
+function moveRight() {
+    if (isGoing) {
+        let move = {
+            row: 0,
+            col: speed
+        };
+        let nextPosition = {
+            row: player.row + move.row,
+            col: player.col + move.col
+        };
+
+        if (nextPosition.row >= 0 &&
+            nextPosition.row < currentWorld.length &&
+            nextPosition.col >= 0 &&
+            nextPosition.col < currentWorld[0].length) {
+
+            if (currentWorld[nextPosition.row][nextPosition.col] !== `W`) {
+                player.row = nextPosition.row;
+                player.col = nextPosition.col;
+            }
+        }
+    }
 }
