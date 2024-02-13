@@ -147,6 +147,12 @@ function draw() {
 }
 
 function displayWorld() {
+    push();
+    noStroke();
+    fill(255);
+    rect(width - TILE_SIZE * 3, 0, TILE_SIZE * 3, TILE_SIZE * 3);
+    pop();
+
     for (let row = 0; row < world.length; row++) {
         for (let col = 0; col < world[row].length; col++) {
             let tile = world[row][col];
@@ -164,6 +170,8 @@ function displayWorld() {
 function displayWall(row, col) {
     let x = col * TILE_SIZE;
     let y = row * TILE_SIZE;
+    stroke(0)
+    strokeWeight(1);
     push();
     noStroke();
     fill(32, 194, 14);
