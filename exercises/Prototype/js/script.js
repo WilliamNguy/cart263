@@ -1,5 +1,4 @@
 "use strict";
-
 let TILE_SIZE = 20;
 let voice = new p5.Speech()
 let speechRecognizer = new p5.SpeechRec();
@@ -79,6 +78,8 @@ let earlySpawn = 500;
 let lateSpawn = 2000;
 let isGoing = false;
 let isRunning = false;
+let isFlying = false;
+let isDropped = false;
 let intervalId = null;
 
 
@@ -101,7 +102,7 @@ function setup() {
     speechRecognizer.onResult = handleResult;
     speechRecognizer.continuous = true;
     speechRecognizer.start();
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 0; i++) {
         fallingSquare.push(new FallingSquare());
     }
 
@@ -112,24 +113,15 @@ function setup() {
 Description of draw()
 */
 function draw() {
-    // if (currentWorld === world2) {
-    //     bgc.red = 0;
-    //     bgc.green = 255;
-    //     bgc.blue = 0;
-    // }
-    // else {
-    //     bgc.red = 255;
-    //     bgc.green = 255;
-    //     bgc.blue = 255;
-    // }
-
     background(bgc.red, bgc.green, bgc.blue);
     displayWorld();
     displayPlayer();
+
     if (millis() - lastSpawnTime > random(earlySpawn, lateSpawn)) {
         fallingSquare.push(new FallingSquare());
         lastSpawnTime = millis();
     }
+
 
     for (let i = 0; i < fallingSquare.length; i++) {
         fallingSquare[i].update();
@@ -139,19 +131,26 @@ function draw() {
             player.col * TILE_SIZE, player.row * TILE_SIZE, TILE_SIZE, TILE_SIZE,
             fallingSquare[i].col * TILE_SIZE, fallingSquare[i].row * TILE_SIZE, TILE_SIZE, TILE_SIZE,
         )) {
-            bgc.green = 32;
-            bgc.red = 194;
-            bgc.blue = 14;
+            resetPlayer();
         }
     }
+
+    fill(255);
+    textAlign(CENTER, TOP);
+    textSize(20);
+    text("Reach the top right and stop moving...", width / 2, 20);
+
+    textAlign(CENTER, BOTTOM);
+    text("up, down, left, right     |    shoot right/left     |     fly up, stop it     |     run, wait      |      drop, good", width / 2, height - 20);
+
+}
+
+function resetPlayer() {
+    player.row = 35;
+    player.col = 2;
 }
 
 function displayWorld() {
-    push();
-    noStroke();
-    fill(255);
-    rect(width - TILE_SIZE * 3, 0, TILE_SIZE * 3, TILE_SIZE * 3);
-    pop();
 
     for (let row = 0; row < world.length; row++) {
         for (let col = 0; col < world[row].length; col++) {
@@ -170,8 +169,6 @@ function displayWorld() {
 function displayWall(row, col) {
     let x = col * TILE_SIZE;
     let y = row * TILE_SIZE;
-    stroke(0)
-    strokeWeight(1);
     push();
     noStroke();
     fill(32, 194, 14);
@@ -210,7 +207,6 @@ function handleResult() {
         }
     }
 
-
     switch (currentSpeech) {
         case "left":
             move.col = -speed;
@@ -243,6 +239,7 @@ function handleResult() {
             bgc.green = 255;
             bgc.red = 255;
             bgc.blue = 255;
+            break;
         case "shoot right":
             move.row = -2;
             move.col = 2;
@@ -268,8 +265,30 @@ function handleResult() {
                 intervalId = setInterval(runRight, 100);
             }
             break;
-        case "halt":
+        case "wait":
             isRunning = false;
+            clearInterval(intervalId);
+            intervalId = null;
+            break;
+        case "fly up":
+            isFlying = true;
+            if (!intervalId) {
+                intervalId = setInterval(flyUp, 100);
+            }
+            break;
+        case "stop it":
+            isFlying = false;
+            clearInterval(intervalId);
+            intervalId = null;
+            break;
+        case "drop":
+            isDropped = true;
+            if (!intervalId) {
+                intervalId = setInterval(droppedDown, 1200);
+            }
+            break;
+        case "good":
+            isDropped = false;
             clearInterval(intervalId);
             intervalId = null;
             break;
@@ -292,6 +311,11 @@ function handleResult() {
         }
     }
 
+    if (player.col === currentWorld[0].length - 2 && player.row === 1) {
+        bgc.red = 0;
+        bgc.green = 255;
+        bgc.blue = 0;
+    }
 
     if (currentSpeech == "faster") {
         speed++;
@@ -352,3 +376,52 @@ function runRight() {
         }
     }
 }
+
+function flyUp() {
+    if (isFlying) {
+        let move = {
+            row: -speed,
+            col: 0
+        };
+        let nextPosition = {
+            row: player.row + move.row,
+            col: player.col + move.col
+        };
+
+        if (nextPosition.row >= 0 &&
+            nextPosition.row < currentWorld.length &&
+            nextPosition.col >= 0 &&
+            nextPosition.col < currentWorld[0].length) {
+
+            if (currentWorld[nextPosition.row][nextPosition.col] !== `W`) {
+                player.row = nextPosition.row;
+                player.col = nextPosition.col;
+            }
+        }
+    }
+}
+
+function droppedDown() {
+    if (isDropped) {
+        let move = {
+            row: speed,
+            col: 0
+        };
+        let nextPosition = {
+            row: player.row + move.row,
+            col: player.col + move.col
+        };
+
+        if (nextPosition.row >= 0 &&
+            nextPosition.row < currentWorld.length &&
+            nextPosition.col >= 0 &&
+            nextPosition.col < currentWorld[0].length) {
+
+            if (currentWorld[nextPosition.row][nextPosition.col] !== `W`) {
+                player.row = nextPosition.row;
+                player.col = nextPosition.col;
+            }
+        }
+    }
+}
+
