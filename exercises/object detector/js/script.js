@@ -15,9 +15,15 @@ function setup() {
         facemesh = ml5.facemesh(video, modelReady);
         facemesh.on("face", results => {
             predictions = results;
+            if (predictions.length === 0) {
+                facemeshActivated = false;
+                setTimeout(() => {
+                    facemeshActivated = true;
+                }, 6000);
+            }
         });
         facemeshActivated = true;
-    }, 3000);
+    }, 6000);
 
     detector = ml5.objectDetector('cocossd', modelReady);
 }
