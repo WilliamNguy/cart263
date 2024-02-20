@@ -7,6 +7,9 @@ let facemeshActivated = false;
 let handpose;
 let hands = [];
 
+let speechRecognizer;
+let voiceDetection = false;
+
 function setup() {
     createCanvas(640, 480);
     video = createCapture(VIDEO, videoReady);
@@ -19,9 +22,14 @@ function setup() {
             predictions = results;
             if (predictions.length === 0) {
                 facemeshActivated = false;
-                setTimeout(() => {
-                    facemeshActivated = true;
-                }, 6000);
+            } else {
+                facemeshActivated = true;
+                if (!speechRecognizer) {
+                    speechRecognizer = new p5.SpeechRec();
+                    speechRecognizer.onResult = handleResult;
+                    speechRecognizer.continuous = true;
+                    speechRecognizer.start();
+                }
             }
         });
         facemeshActivated = true;
@@ -29,10 +37,13 @@ function setup() {
 
     detector = ml5.objectDetector('cocossd', modelReady);
 
+
     handpose = ml5.handpose(video, modelReady);
     handpose.on("hand", results => {
         hands = results;
     })
+
+
 }
 
 function videoReady() {
@@ -74,6 +85,11 @@ function draw() {
         text(object.label, object.x + 10, object.y + 24);
     }
     drawHands();
+
+    if (voiceDetection) {
+        fill(0);
+        rect(0, height - 50, width, 50);
+    }
 }
 
 function drawKeypoints() {
@@ -95,5 +111,14 @@ function drawHands() {
             fill(255, 0, 0);
             ellipse(x, y, 10, 10);
         }
+    }
+}
+
+function handleResult() {
+    if (speechRecognizer.resultValue === true) {
+        console.log(speechRecognizer.resultString);
+        voiceDetection = true;
+    } else {
+        voiceDetection = false;
     }
 }

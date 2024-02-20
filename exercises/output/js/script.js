@@ -23,6 +23,7 @@ Description of setup
 */
 function setup() {
     speechRecognizer.onResult = handleResult;
+    speechRecognizer.continuous = true;
     speechRecognizer.start();
 }
 
