@@ -3,24 +3,28 @@ let video;
 let predictions = [];
 let detector;
 let detections = [];
+let facemeshActivated = false;
 
 function setup() {
     createCanvas(640, 480);
     video = createCapture(VIDEO, videoReady);
     video.size(640, 480);
     video.hide();
-
-    facemesh = ml5.facemesh(video, modelReady);
-
-    facemesh.on("face", results => {
-        predictions = results;
-    });
+    // 2 seconds delay
+    setTimeout(() => {
+        facemesh = ml5.facemesh(video, modelReady);
+        facemesh.on("face", results => {
+            predictions = results;
+        });
+        facemeshActivated = true;
+    }, 3000);
 
     detector = ml5.objectDetector('cocossd', modelReady);
 }
 
 function videoReady() {
-    detector = ml5.objectDetector('cocossd', modelReady);
+    detector.detect(video, gotDetections);
+    // detector = ml5.objectDetector('cocossd', modelReady);
 }
 
 function gotDetections(error, results) {
@@ -32,14 +36,18 @@ function gotDetections(error, results) {
 }
 
 function modelReady() {
-    detector.detect(video, gotDetections);
+    if (facemeshActivated) {
+        detector.detect(video, gotDetections);
+    }
     console.log("Model ready!");
 }
 
 function draw() {
     image(video, 0, 0, width, height);
 
-    drawKeypoints();
+    if (facemeshActivated) {
+        drawKeypoints();
+    }
 
     for (let i = 0; i < detections.length; i += 1) {
         const object = detections[i];
