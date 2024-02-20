@@ -1,15 +1,6 @@
-// Copyright (c) 2020 ml5
-//
-// This software is released under the MIT License.
-// https://opensource.org/licenses/MIT
-
-/* ===
-ml5 Example
-Object Detection using COCOSSD
-This example uses a callback pattern to create the classifier
-=== */
-
+let facemesh;
 let video;
+let predictions = [];
 let detector;
 let detections = [];
 
@@ -18,10 +9,17 @@ function setup() {
     video = createCapture(VIDEO, videoReady);
     video.size(640, 480);
     video.hide();
+
+    facemesh = ml5.facemesh(video, modelReady);
+
+    facemesh.on("face", results => {
+        predictions = results;
+    });
+
+    detector = ml5.objectDetector('cocossd', modelReady);
 }
 
 function videoReady() {
-    // Models available are 'cocossd', 'yolo'
     detector = ml5.objectDetector('cocossd', modelReady);
 }
 
@@ -35,10 +33,13 @@ function gotDetections(error, results) {
 
 function modelReady() {
     detector.detect(video, gotDetections);
+    console.log("Model ready!");
 }
 
 function draw() {
-    image(video, 0, 0);
+    image(video, 0, 0, width, height);
+
+    drawKeypoints();
 
     for (let i = 0; i < detections.length; i += 1) {
         const object = detections[i];
@@ -50,5 +51,16 @@ function draw() {
         fill(255);
         textSize(24);
         text(object.label, object.x + 10, object.y + 24);
+    }
+}
+
+function drawKeypoints() {
+    for (let i = 0; i < predictions.length; i++) {
+        const keypoints = predictions[i].scaledMesh;
+        for (let j = 0; j < keypoints.length; j++) {
+            const [x, y] = keypoints[j];
+            fill(0, 255, 0);
+            ellipse(x, y, 5, 5);
+        }
     }
 }
