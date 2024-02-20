@@ -4,6 +4,8 @@ let predictions = [];
 let detector;
 let detections = [];
 let facemeshActivated = false;
+let handpose;
+let hands = [];
 
 function setup() {
     createCanvas(640, 480);
@@ -26,6 +28,11 @@ function setup() {
     }, 6000);
 
     detector = ml5.objectDetector('cocossd', modelReady);
+
+    handpose = ml5.handpose(video, modelReady);
+    handpose.on("hand", results => {
+        hands = results;
+    })
 }
 
 function videoReady() {
@@ -66,6 +73,7 @@ function draw() {
         textSize(24);
         text(object.label, object.x + 10, object.y + 24);
     }
+    drawHands();
 }
 
 function drawKeypoints() {
@@ -75,6 +83,17 @@ function drawKeypoints() {
             const [x, y] = keypoints[j];
             fill(0, 255, 0);
             ellipse(x, y, 5, 5);
+        }
+    }
+}
+
+function drawHands() {
+    for (let i = 0; i < hands.length; i++) {
+        const landmarks = hands[i].landmarks;
+        for (let j = 0; j < landmarks.length; j++) {
+            const [x, y] = landmarks[j];
+            fill(255, 0, 0);
+            ellipse(x, y, 10, 10);
         }
     }
 }
