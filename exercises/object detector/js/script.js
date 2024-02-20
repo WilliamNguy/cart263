@@ -1,27 +1,17 @@
-/**
-Title of Project
-Author Name
+// Copyright (c) 2020 ml5
+//
+// This software is released under the MIT License.
+// https://opensource.org/licenses/MIT
 
-This is a template. You must fill in the title,
-author, and this description to match your project!
-*/
-
-"use strict";
-
-
-/**
-Description of preload
-*/
-
+/* ===
+ml5 Example
+Object Detection using COCOSSD
+This example uses a callback pattern to create the classifier
+=== */
 
 let video;
 let detector;
 let detections = [];
-
-function preload() {
-
-}
-
 
 function setup() {
     createCanvas(640, 480);
