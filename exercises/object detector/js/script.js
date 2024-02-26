@@ -154,3 +154,4 @@ function handleResult() {
         voiceDetection = false;
     }
 }
+
