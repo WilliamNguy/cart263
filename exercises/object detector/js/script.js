@@ -13,6 +13,35 @@ let voiceDetection = false;
 let handScannerActivated = false;
 let eyeScannerActivated = false;
 
+let typingSound;
+
+var st = "ILoveCart263";
+var allData = "";
+var c = 0;
+var stlength = st.length;
+
+function preload() {
+    typingSound = loadSound('assets/sounds/type.wav');
+}
+
+function naciFunction(event) {
+    if (c >= stlength) {
+        document.removeEventListener('keyup', naciFunction);
+        return;
+    }
+
+    allData = allData + st[c];
+    c++;
+
+    document.getElementById("dataArea").innerHTML = allData;
+
+    if (typingSound.isLoaded()) {
+        typingSound.play();
+    }
+}
+
+document.addEventListener('keyup', naciFunction);
+
 function setup() {
     createCanvas(640, 480);
     video = createCapture(VIDEO, videoReady);
@@ -95,8 +124,13 @@ function draw() {
         fill(255);
         textSize(24);
         text("login:", 10, height - 20);
+
+        naciFunction();
+
     }
 }
+
+
 
 function drawKeypoints() {
     for (let i = 0; i < predictions.length; i++) {
@@ -129,15 +163,6 @@ function drawHands() {
         }
     }
 }
-
-// function handleResult() {
-//     if (speechRecognizer.resultValue === true) {
-//         console.log(speechRecognizer.resultString);
-//         voiceDetection = true;
-//     } else {
-//         voiceDetection = false;
-//     }
-// }
 
 function handleResult() {
     if (speechRecognizer.resultValue) {
