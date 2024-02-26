@@ -11,6 +11,7 @@ let speechRecognizer;
 let voiceDetection = false;
 
 let handScannerActivated = false;
+let eyeScannerActivated = false;
 
 function setup() {
     createCanvas(640, 480);
@@ -88,19 +89,30 @@ function draw() {
     }
     drawHands();
 
-    if (voiceDetection) {
+    if (voiceDetection && handScannerActivated && eyeScannerActivated) {
         fill(0);
         rect(0, height - 50, width, 50);
+        fill(255);
+        textSize(24);
+        text("login:", 10, height - 20);
     }
 }
 
 function drawKeypoints() {
     for (let i = 0; i < predictions.length; i++) {
         const keypoints = predictions[i].scaledMesh;
-        for (let j = 0; j < keypoints.length; j++) {
-            const [x, y] = keypoints[j];
-            fill(0, 255, 0);
-            ellipse(x, y, 5, 5);
+        if (eyeScannerActivated) {
+            for (let j = 381; j < 395; j += 1) {
+                const [x, y] = keypoints[j];
+                fill(0, 255, 0);
+                ellipse(x, y, 5, 5);
+            }
+        } else {
+            for (let j = 0; j < keypoints.length; j++) {
+                const [x, y] = keypoints[j];
+                fill(0, 255, 0);
+                ellipse(x, y, 5, 5);
+            }
         }
     }
 }
@@ -133,6 +145,9 @@ function handleResult() {
         console.log("Result string: " + speechRecognizer.resultString);
         if (speechRecognizer.resultString.toLowerCase().includes("activate hand scanner")) {
             handScannerActivated = true;
+        }
+        if (speechRecognizer.resultString.toLowerCase().includes("activate eye scanner")) {
+            eyeScannerActivated = true;
         }
         voiceDetection = true;
     } else {
