@@ -5,8 +5,20 @@
   <meta charset="utf-8">
   <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
 
-  <title>CHANGE THIS TITLE IN INDEX.HTML!</title>
-
+  <title>Security Check</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 100vh;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+  </style>
   <!-- CSS stylesheet(s) -->
   <link rel="stylesheet" type="text/css" href="css/style.css" />
 
@@ -21,6 +33,15 @@
 </head>
 
 <body>
+  <div class="instructions">
+    <h2>Instructions:</h2>
+    <p>1. Let camera identify you as a person.</p>
+    <p>2. Wait for face scan to load.</p>
+    <p>3. Once face scanned, voice detection is activated.</p>
+    <p>4. Say "activate hand scanner".</p>
+    <p>5. Say "activate eye scanner".</p>
+    <p>5. Use keyboard to type password.</p>
+  </div>
   <div id="blackBox"
     style="display: none; position: absolute; bottom: 0; left: 0; width: 100%; background: rgb(255, 255, 255); color: white; padding: 10px;">
   </div>

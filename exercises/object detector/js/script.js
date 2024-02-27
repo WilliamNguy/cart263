@@ -18,6 +18,10 @@ let typingSound;
 let showButton = false;
 let buttonClicked = false;
 
+let activationTime = -1;
+
+let personDetected = false;
+
 let websiteURL = "https://pippinbarr.com/cart263/course-information/schedule.html";
 
 var st = "ILoveCart263";
@@ -68,6 +72,9 @@ function setup() {
             if (predictions.length === 0) {
                 facemeshActivated = false;
             } else {
+                if (activationTime === -1) {
+                    activationTime = millis();
+                }
                 facemeshActivated = true;
                 if (!speechRecognizer) {
                     speechRecognizer = new p5.SpeechRec();
@@ -101,6 +108,9 @@ function gotDetections(error, results) {
         console.error(error);
     }
     detections = results;
+
+    personDetected = detections.some(object => object.label === "person");
+
     detector.detect(video, gotDetections);
 }
 
@@ -114,7 +124,7 @@ function modelReady() {
 function draw() {
     image(video, 0, 0, width, height);
 
-    if (facemeshActivated) {
+    if (personDetected && facemeshActivated && handpose) {
         drawKeypoints();
     }
 
@@ -136,7 +146,7 @@ function draw() {
         rect(0, height - 50, width, 50);
         fill(255);
         textSize(24);
-        text("login:", 10, height - 20);
+        text("Type passcode:", 10, height - 20);
 
         // if (allData !== st) {
         // naciFunction();
@@ -164,13 +174,21 @@ function drawKeypoints() {
         if (eyeScannerActivated) {
             for (let j = 381; j < 395; j += 1) {
                 const [x, y] = keypoints[j];
-                fill(0, 255, 0);
+                if (millis() - activationTime < 2000) {
+                    fill(255, 0, 0);
+                } else {
+                    fill(0, 255, 0);
+                }
                 ellipse(x, y, 5, 5);
             }
         } else {
             for (let j = 0; j < keypoints.length; j++) {
                 const [x, y] = keypoints[j];
-                fill(0, 255, 0);
+                if (millis() - activationTime < 2000) {
+                    fill(255, 0, 0);
+                } else {
+                    fill(0, 255, 0);
+                }
                 ellipse(x, y, 5, 5);
             }
         }

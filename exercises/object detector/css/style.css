@@ -24,11 +24,16 @@ body {
 
 #dataArea {
   position: absolute;
-  bottom: 190px;
-  left: 450px;
+  bottom: 0px;
+  left: 700px;
   right: 10px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   color: white;
+}
+
+.instructions {
+  width: 200px;
+  text-align: left;
 }
