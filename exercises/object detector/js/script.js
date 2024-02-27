@@ -15,6 +15,11 @@ let eyeScannerActivated = false;
 
 let typingSound;
 
+let showButton = false;
+let buttonClicked = false;
+
+let websiteURL = "https://pippinbarr.com/cart263/course-information/schedule.html";
+
 var st = "ILoveCart263";
 var allData = "";
 var c = 0;
@@ -27,6 +32,7 @@ function preload() {
 function naciFunction(event) {
     if (c >= stlength) {
         document.removeEventListener('keyup', naciFunction);
+        showButton = true;
         return;
     }
 
@@ -136,6 +142,18 @@ function draw() {
         // naciFunction();
         // }
     }
+
+    if (showButton) {
+        if (buttonClicked) {
+            fill(200);
+        } else {
+            fill(255);
+        }
+        rect(width - 100, height - 50, 100, 50);
+        fill(0);
+        textSize(20);
+        text("enter", width - 90, height - 20);
+    }
 }
 
 
@@ -188,3 +206,8 @@ function handleResult() {
     }
 }
 
+function mousePressed() {
+    if (showButton && mouseX > width - 100 && mouseX < width && mouseY > height - 50 && mouseY < height) {
+        window.open(websiteURL, "_blank");
+    }
+}

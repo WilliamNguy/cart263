@@ -25,7 +25,7 @@ body {
 #dataArea {
   position: absolute;
   bottom: 190px;
-  left: 550px;
+  left: 450px;
   right: 10px;
   overflow: hidden;
   white-space: nowrap;
