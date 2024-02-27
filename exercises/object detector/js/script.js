@@ -30,15 +30,22 @@ function naciFunction(event) {
         return;
     }
 
-    allData = allData + st[c];
-    c++;
+    setTimeout(function () {
+        if (handScannerActivated && eyeScannerActivated && voiceDetection) {
+            allData = allData + st[c];
+            c++;
 
-    document.getElementById("dataArea").innerHTML = allData;
+            document.getElementById("dataArea").innerHTML = allData;
 
-    if (typingSound.isLoaded()) {
-        typingSound.play();
-    }
+            if (typingSound.isLoaded()) {
+                typingSound.play();
+            }
+        }
+        // naciFunction();
+    }, 100);
 }
+
+// setTimeout(naciFunction, 2000);
 
 document.addEventListener('keyup', naciFunction);
 
@@ -125,8 +132,9 @@ function draw() {
         textSize(24);
         text("login:", 10, height - 20);
 
-        naciFunction();
-
+        // if (allData !== st) {
+        // naciFunction();
+        // }
     }
 }
 
