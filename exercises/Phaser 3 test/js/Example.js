@@ -14,11 +14,11 @@ class Example extends Phaser.Scene {
     preload() {
         // Load in images and sprites
         this.load.spritesheet('player_handgun', 'assets/images/player.png',
-            { frameWidth: 66, frameHeight: 60 }
+            { frameWidth: 800, frameHeight: 600 }
         ); // Made by tokkatrain: https://tokkatrain.itch.io/top-down-basic-set
         this.load.image('bullet', 'assets/images/laser.png');
         this.load.image('target', 'assets/images/mouse.png');
-        // this.load.image('background', 'assets/skies/underwater1.png');
+        this.load.image('background', 'assets/images/grass.png');
     }
 
     create() {
@@ -40,7 +40,7 @@ class Example extends Phaser.Scene {
 
         // Set image/sprite properties
         background.setOrigin(0.5, 0.5).setDisplaySize(1600, 1200);
-        this.player.setOrigin(0.5, 0.5).setDisplaySize(300, 300).setCollideWorldBounds(true).setDrag(500, 500);
+        this.player.setOrigin(0.5, 0.5).setDisplaySize(66, 60).setCollideWorldBounds(true).setDrag(500, 500);
         this.enemy.setOrigin(0.5, 0.5).setDisplaySize(132, 120).setCollideWorldBounds(true);
         this.reticle.setOrigin(0.5, 0.5).setDisplaySize(25, 25).setCollideWorldBounds(true);
         this.hp1.setOrigin(0.5, 0.5).setDisplaySize(50, 50);
@@ -72,7 +72,7 @@ class Example extends Phaser.Scene {
             if (this.player.active === false) { return; }
 
             // Get bullet from bullets group
-            const bullet = this.playerBullets.get().setActive(true).setVisible(true);
+            const bullet = this.playerBullets.get().setActive(true).setVisible(true).setDisplaySize(45, 45);
 
             if (bullet) {
                 bullet.fire(this.player, this.reticle);
@@ -185,7 +185,7 @@ class Example extends Phaser.Scene {
             this.enemy.lastFired = time;
 
             // Get bullet from bullets group
-            const bullet = this.enemyBullets.get().setActive(true).setVisible(true);
+            const bullet = this.enemyBullets.get().setActive(true).setVisible(true).setDisplaySize(45, 45);
 
             if (bullet) {
                 bullet.fire(this.enemy, this.player);
