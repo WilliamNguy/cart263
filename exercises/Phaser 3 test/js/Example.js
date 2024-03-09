@@ -1,45 +1,63 @@
 class Example extends Phaser.Scene {
     time = 0;
-    lastFired = 0;
-    bullets;
+    enemyBullets;
+    playerBullets;
     moveKeys;
     reticle;
+    healthpoints;
     player;
+    enemy;
+    hp1;
+    hp2;
+    hp3;
 
     preload() {
         // Load in images and sprites
-        this.load.spritesheet(
-            'player_handgun',
-            'assets/sprites/player_handgun.png',
+        this.load.spritesheet('player_handgun', 'assets/images/player.png',
             { frameWidth: 66, frameHeight: 60 }
         ); // Made by tokkatrain: https://tokkatrain.itch.io/top-down-basic-set
-        this.load.image('target', 'assets/demoscene/ball.png');
-        this.load.image('background', 'assets/skies/underwater1.png');
+        this.load.image('bullet', 'assets/images/laser.png');
+        this.load.image('target', 'assets/images/mouse.png');
+        // this.load.image('background', 'assets/skies/underwater1.png');
     }
 
     create() {
-        // Create world bounds
+        // Set world bounds
         this.physics.world.setBounds(0, 0, 1600, 1200);
 
-        // Add background, player, and reticle sprites
+        // Add 2 groups for Bullet objects
+        this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
+        this.enemyBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
+
+        // Add background player, enemy, reticle, healthpoint sprites
         const background = this.add.image(800, 600, 'background');
         this.player = this.physics.add.sprite(800, 600, 'player_handgun');
+        this.enemy = this.physics.add.sprite(300, 600, 'player_handgun');
         this.reticle = this.physics.add.sprite(800, 700, 'target');
+        this.hp1 = this.add.image(-200, 10, 'target').setScrollFactor(0.5, 0.5);
+        this.hp2 = this.add.image(-150, 10, 'target').setScrollFactor(0.5, 0.5);
+        this.hp3 = this.add.image(-100, 10, 'target').setScrollFactor(0.5, 0.5);
 
         // Set image/sprite properties
         background.setOrigin(0.5, 0.5).setDisplaySize(1600, 1200);
-        this.player
-            .setOrigin(0.5, 0.5)
-            .setDisplaySize(132, 120)
-            .setCollideWorldBounds(true)
-            .setDrag(500, 500);
-        this.reticle
-            .setOrigin(0.5, 0.5)
-            .setDisplaySize(25, 25)
-            .setCollideWorldBounds(true);
+        this.player.setOrigin(0.5, 0.5).setDisplaySize(300, 300).setCollideWorldBounds(true).setDrag(500, 500);
+        this.enemy.setOrigin(0.5, 0.5).setDisplaySize(132, 120).setCollideWorldBounds(true);
+        this.reticle.setOrigin(0.5, 0.5).setDisplaySize(25, 25).setCollideWorldBounds(true);
+        this.hp1.setOrigin(0.5, 0.5).setDisplaySize(50, 50);
+        this.hp2.setOrigin(0.5, 0.5).setDisplaySize(50, 50);
+        this.hp3.setOrigin(0.5, 0.5).setDisplaySize(50, 50);
 
-        // Set camera zoom
-        this.cameras.main.zoom = 0.5;
+        // Set sprite variables
+        this.player.health = 3;
+        this.enemy.health = 3;
+        this.enemy.lastFired = 0;
+
+        // Set camera properties
+        this.cameras.main.zoom = 0.465;
+        this.cameras.main.scrollX += 500;
+        this.cameras.main.scrollY += 300;
+
+        // this.cameras.main.startFollow(this.player);
 
         // Creates object for input with WASD kets
         this.moveKeys = this.input.keyboard.addKeys({
@@ -49,87 +67,60 @@ class Example extends Phaser.Scene {
             right: Phaser.Input.Keyboard.KeyCodes.D
         });
 
-        // Enables movement of player with WASD keys
-        this.input.keyboard.on('keydown_W', (event) => {
-            this.player.setAccelerationY(-800);
-        });
-        this.input.keyboard.on('keydown_S', (event) => {
-            this.player.setAccelerationY(800);
-        });
-        this.input.keyboard.on('keydown_A', (event) => {
-            this.player.setAccelerationX(-800);
-        });
-        this.input.keyboard.on('keydown_D', (event) => {
-            this.player.setAccelerationX(800);
+        // Fires bullet from player on left click of mouse
+        this.input.on('pointerdown', (pointer, time, lastFired) => {
+            if (this.player.active === false) { return; }
+
+            // Get bullet from bullets group
+            const bullet = this.playerBullets.get().setActive(true).setVisible(true);
+
+            if (bullet) {
+                bullet.fire(this.player, this.reticle);
+                this.physics.add.collider(this.enemy, bullet, (enemyHit, bulletHit) => this.enemyHitCallback(enemyHit, bulletHit));
+            }
         });
 
-        // Stops player acceleration on uppress of WASD keys
-        this.input.keyboard.on('keyup_W', (event) => {
-            if (this.moveKeys['down'].isUp) { this.player.setAccelerationY(0); }
-        });
-        this.input.keyboard.on('keyup_S', (event) => {
-            if (this.moveKeys['up'].isUp) { this.player.setAccelerationY(0); }
-        });
-        this.input.keyboard.on('keyup_A', (event) => {
-            if (this.moveKeys['right'].isUp) { this.player.setAccelerationX(0); }
-        });
-        this.input.keyboard.on('keyup_D', (event) => {
-            if (this.moveKeys['left'].isUp) { this.player.setAccelerationX(0); }
-        });
-
-        // Locks pointer on mousedown
+        // Pointer lock will only work after mousedown
         game.canvas.addEventListener('mousedown', () => {
             game.input.mouse.requestPointerLock();
         });
 
         // Exit pointer lock when Q or escape (by default) is pressed.
-        this.input.keyboard.on(
-            'keydown_Q',
-            (event) => {
-                if (game.input.mouse.locked) { game.input.mouse.releasePointerLock(); }
-            },
-            0,
-        );
+        this.input.keyboard.on('keydown_Q', event => {
+            if (game.input.mouse.locked) { game.input.mouse.releasePointerLock(); }
+        }, 0);
 
         // Move reticle upon locked pointer move
-        this.input.on(
-            'pointermove',
-            function (pointer) {
-                if (this.input.mouse.locked) {
-                    // Move reticle with mouse
-                    this.reticle.x += pointer.movementX;
-                    this.reticle.y += pointer.movementY;
+        this.input.on('pointermove', pointer => {
+            if (this.input.mouse.locked) {
+                this.reticle.x += pointer.movementX;
+                this.reticle.y += pointer.movementY;
+            }
+        });
 
-                    // Only works when camera follows player
-                    const distX = this.reticle.x - this.player.x;
-                    const distY = this.reticle.y - this.player.y;
-
-                    // Ensures reticle cannot be moved offscreen
-                    if (distX > 800) { this.reticle.x = this.player.x + 800; }
-                    else if (distX < -800) { this.reticle.x = this.player.x - 800; }
-
-                    if (distY > 600) { this.reticle.y = this.player.y + 600; }
-                    else if (distY < -600) { this.reticle.y = this.player.y - 600; }
-                }
-            },
-            this
-        );
     }
 
     update(time, delta) {
-        // Rotates player to face towards reticle
-        this.player.rotation = Phaser.Math.Angle.Between(
-            this.player.x,
-            this.player.y,
-            this.reticle.x,
-            this.reticle.y
-        );
+        this.player.body.setVelocity(0);
 
-        // Camera position is average between reticle and player positions
-        const avgX = (this.player.x + this.reticle.x) / 2 - 400;
-        const avgY = (this.player.y + this.reticle.y) / 2 - 300;
-        this.cameras.main.scrollX = avgX;
-        this.cameras.main.scrollY = avgY;
+        if (this.moveKeys.left.isDown) {
+            this.player.body.setVelocityX(-400);
+        }
+        else if (this.moveKeys.right.isDown) {
+            this.player.body.setVelocityX(400);
+        }
+
+        if (this.moveKeys.up.isDown) {
+            this.player.body.setVelocityY(-400);
+        }
+        else if (this.moveKeys.down.isDown) {
+            this.player.body.setVelocityY(400);
+        }
+        // Rotates player to face towards reticle
+        this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
+
+        // Rotates enemy to face towards player
+        this.enemy.rotation = Phaser.Math.Angle.Between(this.enemy.x, this.enemy.y, this.player.x, this.player.y);
 
         // Make reticle move with player
         this.reticle.body.velocity.x = this.player.body.velocity.x;
@@ -138,8 +129,71 @@ class Example extends Phaser.Scene {
         // Constrain velocity of player
         this.constrainVelocity(this.player, 500);
 
-        // Constrain position of reticle
-        this.constrainReticle(this.reticle, 550);
+        // Constrain position of constrainReticle
+        this.constrainReticle(this.reticle);
+
+        // Make enemy fire
+        this.enemyFire(time);
+    }
+
+    enemyHitCallback(enemyHit, bulletHit) {
+        // Reduce health of enemy
+        if (bulletHit.active === true && enemyHit.active === true) {
+            enemyHit.health = enemyHit.health - 1;
+            console.log('Enemy hp: ', enemyHit.health);
+
+            // Kill enemy if health <= 0
+            if (enemyHit.health <= 0) {
+                enemyHit.setActive(false).setVisible(false);
+            }
+
+            // Destroy bullet
+            bulletHit.setActive(false).setVisible(false);
+        }
+    }
+
+    playerHitCallback(playerHit, bulletHit) {
+        // Reduce health of player
+        if (bulletHit.active === true && playerHit.active === true) {
+            playerHit.health = playerHit.health - 1;
+            console.log('Player hp: ', playerHit.health);
+
+            // Kill hp sprites and kill player if health <= 0
+            if (playerHit.health === 2) {
+                this.hp3.destroy();
+            }
+            else if (playerHit.health === 1) {
+                this.hp2.destroy();
+            }
+            else {
+                this.hp1.destroy();
+
+                // Game over state should execute here
+            }
+
+            // Destroy bullet
+            bulletHit.setActive(false).setVisible(false);
+        }
+    }
+
+    enemyFire(time) {
+        if (this.enemy.active === false) {
+            return;
+        }
+
+        if ((time - this.enemy.lastFired) > 1000) {
+            this.enemy.lastFired = time;
+
+            // Get bullet from bullets group
+            const bullet = this.enemyBullets.get().setActive(true).setVisible(true);
+
+            if (bullet) {
+                bullet.fire(this.enemy, this.player);
+
+                // Add collider between bullet and player
+                this.physics.add.collider(this.player, bullet, (playerHit, bulletHit) => this.playerHitCallback(playerHit, bulletHit));
+            }
+        }
     }
 
     constrainVelocity(sprite, maxVelocity) {
@@ -159,30 +213,15 @@ class Example extends Phaser.Scene {
         }
     }
 
-    constrainReticle(reticle, radius) {
+    constrainReticle(reticle) {
         const distX = reticle.x - this.player.x; // X distance between player & reticle
         const distY = reticle.y - this.player.y; // Y distance between player & reticle
 
-        // Ensures reticle cannot be moved offscreen
+        // Ensures reticle cannot be moved offscreen (player follow)
         if (distX > 800) { reticle.x = this.player.x + 800; }
         else if (distX < -800) { reticle.x = this.player.x - 800; }
 
         if (distY > 600) { reticle.y = this.player.y + 600; }
         else if (distY < -600) { reticle.y = this.player.y - 600; }
-
-        // Ensures reticle cannot be moved further than dist(radius) from player
-        const distBetween = Phaser.Math.Distance.Between(
-            this.player.x,
-            this.player.y,
-            reticle.x,
-            reticle.y
-        );
-        if (distBetween > radius) {
-            // Place reticle on perimeter of circle on line intersecting player & reticle
-            const scale = distBetween / radius;
-
-            reticle.x = this.player.x + (reticle.x - this.player.x) / scale;
-            reticle.y = this.player.y + (reticle.y - this.player.y) / scale;
-        }
     }
 }

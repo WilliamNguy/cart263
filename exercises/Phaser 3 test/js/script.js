@@ -1,3 +1,4 @@
+
 const config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
@@ -7,10 +8,10 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 0 },
-            debug: true
+            debug: false
         }
     },
-    scene: [Example]
+    scene: Example
 };
 
 const game = new Phaser.Game(config);
