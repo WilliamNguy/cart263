@@ -1,4 +1,10 @@
 class Example extends Phaser.Scene {
+    constructor() {
+        super({
+            key: 'example'
+        });
+    }
+
     time = 0;
     enemyBullets;
     playerBullets;
@@ -7,36 +13,58 @@ class Example extends Phaser.Scene {
     healthpoints;
     player;
     enemy;
+    crate;
     hp1;
     hp2;
     hp3;
 
-    preload() {
-        // Load in images and sprites
-        this.load.spritesheet('player_handgun', 'assets/images/player.png',
-            { frameWidth: 800, frameHeight: 600 }
-        ); // Made by tokkatrain: https://tokkatrain.itch.io/top-down-basic-set
-        this.load.image('bullet', 'assets/images/laser.png');
-        this.load.image('target', 'assets/images/mouse.png');
-        this.load.image('background', 'assets/images/grass.png');
-    }
 
     create() {
         // Set world bounds
-        this.physics.world.setBounds(0, 0, 1600, 1200);
+        this.physics.world.setBounds(100, 0, 1620, 1200);
 
         // Add 2 groups for Bullet objects
         this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
         this.enemyBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
 
         // Add background player, enemy, reticle, healthpoint sprites
-        const background = this.add.image(800, 600, 'background');
+        const background = this.add.image(900, 600, 'background');
         this.player = this.physics.add.sprite(800, 600, 'player_handgun');
+        this.player.setCollideWorldBounds(true);
+
+
         this.enemy = this.physics.add.sprite(300, 600, 'player_handgun');
         this.reticle = this.physics.add.sprite(800, 700, 'target');
         this.hp1 = this.add.image(-200, 10, 'target').setScrollFactor(0.5, 0.5);
         this.hp2 = this.add.image(-150, 10, 'target').setScrollFactor(0.5, 0.5);
         this.hp3 = this.add.image(-100, 10, 'target').setScrollFactor(0.5, 0.5);
+        this.crate = this.physics.add.sprite(400, 1000, 'crate');
+        this.crate.setCollideWorldBounds(true);
+        this.crate.setImmovable(true);
+        this.crate.setDisplaySize(64, 64);
+
+        this.anims.create({
+            key: 'crate-moving',
+            frames: this.anims.generateFrameNumbers('crate', {
+                start: 0,
+                end: 11
+            }),
+            frameRate: 4,
+            repeat: -1
+        });
+
+        this.crate.play('crate-moving');
+
+        this.crates = this.physics.add.group({
+            key: 'crate',
+            immovable: true,
+            quantity: 24
+        });
+
+        // this.physics.add.collider(this.player, this.crate, (player, crate) => {
+        // });
+
+        this.physics.add.collider(this.player, this.crate);
 
         // Set image/sprite properties
         background.setOrigin(0.5, 0.5).setDisplaySize(1600, 1200);
