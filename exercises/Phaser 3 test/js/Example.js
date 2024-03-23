@@ -21,7 +21,7 @@ class Example extends Phaser.Scene {
 
     create() {
         // Set world bounds
-        this.physics.world.setBounds(100, 0, 1620, 1200);
+        this.physics.world.setBounds(100, 275, 1620, 940);
 
         // Add 2 groups for Bullet objects
         this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
@@ -32,6 +32,23 @@ class Example extends Phaser.Scene {
         this.player = this.physics.add.sprite(800, 600, 'player_handgun');
         this.player.setCollideWorldBounds(true);
 
+        let x = Phaser.Math.Between(100, 1620);
+        let y = Phaser.Math.Between(275, 940);
+        this.item1 = this.physics.add.sprite(x, y, 'item1')
+
+        this.item2 = this.physics.add.group({
+            key: 'item2',
+            quantity: 12,
+            bounceX: 0.5,
+            bounceY: 0.5,
+            collideWorldBounds: true,
+            dragX: 50,
+            dragY: 5
+        });
+        Phaser.Actions.RandomRectangle(this.item2.getChildren(), this.physics.world.bounds);
+
+        this.physics.add.overlap(this.playerBullets, this.item1, this.recycled, null, this);
+        this.physics.add.collider(this.player, this.item2);
 
         this.enemy = this.physics.add.sprite(300, 600, 'player_handgun');
         this.reticle = this.physics.add.sprite(800, 700, 'target');
@@ -51,20 +68,48 @@ class Example extends Phaser.Scene {
             }),
             frameRate: 4,
             repeat: -1
-        });
+        },);
 
         this.crate.play('crate-moving');
 
         this.crates = this.physics.add.group({
             key: 'crate',
             immovable: true,
-            quantity: 24
+            quantity: 12
         });
 
-        // this.physics.add.collider(this.player, this.crate, (player, crate) => {
-        // });
+        this.crates.children.each(function (crate) {
+            const x = Phaser.Math.Between(130, 1620); // Random x position between 100 and 1620
+            const y = Phaser.Math.Between(295, 1200);
+            crate.setPosition(x, y);
+            crate.setDisplaySize(64, 64);
+            crate.play('crate-moving');
+        }, this);
 
-        this.physics.add.collider(this.player, this.crate);
+        this.crates.children.iterate(crate => {
+            crate.setDisplaySize(64, 64); // Set the desired width and height
+        });
+
+
+
+        this.physics.add.collider(this.player, this.crates);
+        this.physics.add.collider(this.player, this.crates);
+        this.physics.add.collider(this.item2, this.crates, (item, crate) => {
+        });
+        this.physics.add.collider(this.item2, this.crate, (item, crate) => {
+            // Add bounce effect here if needed
+        });
+        this.physics.add.collider(this.playerBullets, this.crates, (bullet, crate) => {
+            bullet.destroy(); // Destroy bullet upon collision with crate
+        });
+
+        let hitCount = 0; // Track the number of hits
+
+        this.physics.add.overlap(this.playerBullets, this.item1, (bullet, item1) => {
+            const newItem1 = this.add.sprite(50 + hitCount * 160, 0, 'item1'); // Create a new sprite at the top left corner
+            newItem1.setOrigin(0, 0);
+            hitCount++; // Increment hit count
+        });
 
         // Set image/sprite properties
         background.setOrigin(0.5, 0.5).setDisplaySize(1600, 1200);
@@ -252,4 +297,12 @@ class Example extends Phaser.Scene {
         if (distY > 600) { reticle.y = this.player.y + 600; }
         else if (distY < -600) { reticle.y = this.player.y - 600; }
     }
+
+    recycled(playerBullets, item1) {
+        let x = Phaser.Math.Between(100, 1620);
+        let y = Phaser.Math.Between(275, 940);
+        this.item1.setPosition(x, y);
+    }
+
 }
+

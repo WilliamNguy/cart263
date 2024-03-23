@@ -20,6 +20,8 @@ class Boot extends Phaser.Scene {
                 endFrame: 11
             }
         );
+        this.load.image('item1', 'assets/images/bad.png');
+        this.load.image('item2', 'assets/images/clown.png');
         this.load.once('complete', () => {
             this.scene.start('example');
         });
