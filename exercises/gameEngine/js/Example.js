@@ -53,7 +53,7 @@ class Example extends Phaser.Scene {
         let x = Phaser.Math.Between(100, 1620);
         let y = Phaser.Math.Between(275, 940);
         this.item1 = this.physics.add.sprite(x, y, 'item1')
-        this.item1.setDisplaySize(64, 64);
+        this.item1.setDisplaySize(48, 48);
 
 
         this.item2 = this.physics.add.group({
@@ -259,6 +259,13 @@ class Example extends Phaser.Scene {
                 this.physics.velocityFromAngle(angle, speed, item.body.velocity);
             }
         });
+
+        if (Phaser.Math.Between(0, 100) < 2) { // 2% chance to change direction
+            const angle = Phaser.Math.Between(0, 360); // Random angle in degrees
+            const speed = Phaser.Math.Between(50, 100); // Random speed
+            this.physics.velocityFromAngle(angle, speed, this.item1.body.velocity);
+        }
+
         if (Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE))) {
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
             const distance = 140;
