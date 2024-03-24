@@ -17,6 +17,8 @@ class Example extends Phaser.Scene {
     hp1;
     hp2;
     hp3;
+    item1Copies;
+    item1Hits = 0;
 
 
     create() {
@@ -32,26 +34,60 @@ class Example extends Phaser.Scene {
         this.player = this.physics.add.sprite(800, 600, 'player_handgun');
         this.player.setCollideWorldBounds(true);
 
+        this.anims.create({
+            key: 'inflate-moving',
+            frames: this.anims.generateFrameNumbers('player_handgun', {
+                start: 0,
+                end: 19
+            }),
+            frameRate: 6,
+            repeat: -1
+        },);
+
+        this.player.play('inflate-moving');
+
+
+        this.item1Copies = this.add.group(); // Group for item1 copies
+
+
         let x = Phaser.Math.Between(100, 1620);
         let y = Phaser.Math.Between(275, 940);
         this.item1 = this.physics.add.sprite(x, y, 'item1')
+        this.item1.setDisplaySize(64, 64);
+
 
         this.item2 = this.physics.add.group({
             key: 'item2',
-            quantity: 12,
+            quantity: 32,
             bounceX: 0.5,
             bounceY: 0.5,
             collideWorldBounds: true,
             dragX: 50,
             dragY: 5
         });
+
+        this.item2.children.iterate(item => {
+            item.setDisplaySize(75, 75); // Set the desired width and height
+        });
+
         Phaser.Actions.RandomRectangle(this.item2.getChildren(), this.physics.world.bounds);
 
         this.physics.add.overlap(this.playerBullets, this.item1, this.recycled, null, this);
         this.physics.add.collider(this.player, this.item2);
 
-        this.enemy = this.physics.add.sprite(300, 600, 'player_handgun');
-        this.reticle = this.physics.add.sprite(800, 700, 'target');
+        this.enemy = this.physics.add.sprite(300, 600, 'enemy_handgun');
+        this.anims.create({
+            key: 'inflate-move',
+            frames: this.anims.generateFrameNumbers('enemy_handgun', {
+                start: 0,
+                end: 19
+            }),
+            frameRate: 6,
+            repeat: -1
+        },);
+
+        this.enemy.play('inflate-move');
+
         this.hp1 = this.add.image(-200, 10, 'target').setScrollFactor(0.5, 0.5);
         this.hp2 = this.add.image(-150, 10, 'target').setScrollFactor(0.5, 0.5);
         this.hp3 = this.add.image(-100, 10, 'target').setScrollFactor(0.5, 0.5);
@@ -75,12 +111,12 @@ class Example extends Phaser.Scene {
         this.crates = this.physics.add.group({
             key: 'crate',
             immovable: true,
-            quantity: 12
+            quantity: 75
         });
 
         this.crates.children.each(function (crate) {
             const x = Phaser.Math.Between(130, 1620); // Random x position between 100 and 1620
-            const y = Phaser.Math.Between(295, 1200);
+            const y = Phaser.Math.Between(295, 1150);
             crate.setPosition(x, y);
             crate.setDisplaySize(64, 64);
             crate.play('crate-moving');
@@ -111,10 +147,12 @@ class Example extends Phaser.Scene {
             hitCount++; // Increment hit count
         });
 
+        this.reticle = this.physics.add.sprite(800, 700, 'target');
+
         // Set image/sprite properties
         background.setOrigin(0.5, 0.5).setDisplaySize(1600, 1200);
-        this.player.setOrigin(0.5, 0.5).setDisplaySize(66, 60).setCollideWorldBounds(true).setDrag(500, 500);
-        this.enemy.setOrigin(0.5, 0.5).setDisplaySize(132, 120).setCollideWorldBounds(true);
+        this.player.setOrigin(0.5, 0.5).setDisplaySize(64, 64).setCollideWorldBounds(true).setDrag(500, 500);
+        this.enemy.setOrigin(0.5, 0.5).setDisplaySize(96, 96).setCollideWorldBounds(true);
         this.reticle.setOrigin(0.5, 0.5).setDisplaySize(25, 25).setCollideWorldBounds(true);
         this.hp1.setOrigin(0.5, 0.5).setDisplaySize(50, 50);
         this.hp2.setOrigin(0.5, 0.5).setDisplaySize(50, 50);
@@ -207,6 +245,22 @@ class Example extends Phaser.Scene {
 
         // Make enemy fire
         this.enemyFire(time);
+
+        this.item2.getChildren().forEach(item => {
+            if (Phaser.Math.Between(0, 100) < 2) { // 2% chance to change direction
+                const angle = Phaser.Math.Between(0, 360); // Random angle in degrees
+                const speed = Phaser.Math.Between(50, 100); // Random speed
+                this.physics.velocityFromAngle(angle, speed, item.body.velocity);
+            }
+        });
+        if (Phaser.Input.Keyboard.JustDown(this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE))) {
+            const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
+            const distance = 140;
+            const x = this.player.x + Math.cos(angle) * distance;
+            const y = this.player.y + Math.sin(angle) * distance;
+
+            this.player.setPosition(x, y);
+        }
     }
 
     enemyHitCallback(enemyHit, bulletHit) {
@@ -241,7 +295,7 @@ class Example extends Phaser.Scene {
             else {
                 this.hp1.destroy();
 
-                // Game over state should execute here
+                // this.player.setPosition(1620, Phaser.Math.Between(275, 940));
             }
 
             // Destroy bullet
@@ -302,6 +356,33 @@ class Example extends Phaser.Scene {
         let x = Phaser.Math.Between(100, 1620);
         let y = Phaser.Math.Between(275, 940);
         this.item1.setPosition(x, y);
+
+        // Display a copy of item1 at the top left of the screen
+        const copy = this.add.image(0, 0, 'item1').setOrigin(0, 0).setDisplaySize(50, 50);
+        this.item1Copies.add(copy);
+
+        // Position the copies next to each other
+        this.item1Copies.children.iterate((child, index) => {
+            child.x = index * 50; // Assuming 50 is the width of each copy
+        });
+
+        // End the game if 10 item1 have been hit
+        this.item1Hits++;
+        if (this.item1Hits >= 10) {
+            this.gameOver();
+        }
+    }
+
+    gameOver() {
+        const rect = this.add.rectangle(800, 600, 2000, 2000, 0x000000);
+        rect.setAlpha(); // Set the transparency of the rectangle
+
+        // Add text on top of the black rectangle
+        const text = this.add.text(400, 300, 'Thanks for recycling', { fontFamily: 'Arial', fontSize: '32px', color: '#ffffff' });
+        text.setOrigin(0.5);
+
+        this.cameras.main.fadeIn(1000);
+
     }
 
 }

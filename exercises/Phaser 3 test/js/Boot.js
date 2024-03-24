@@ -7,8 +7,11 @@ class Boot extends Phaser.Scene {
 
     preload() {
         // Load in images and sprites
-        this.load.spritesheet('player_handgun', 'assets/images/player.png',
-            { frameWidth: 800, frameHeight: 600 }
+        this.load.spritesheet('player_handgun', 'assets/images/inflate.png',
+            { frameWidth: 32, frameHeight: 32, endFrame: 19 }
+        );
+        this.load.spritesheet('enemy_handgun', 'assets/images/evil.png',
+            { frameWidth: 32, frameHeight: 32, endFrame: 19 }
         );
         this.load.image('bullet', 'assets/images/laser.png');
         this.load.image('target', 'assets/images/mouse.png');
@@ -20,8 +23,8 @@ class Boot extends Phaser.Scene {
                 endFrame: 11
             }
         );
-        this.load.image('item1', 'assets/images/bad.png');
-        this.load.image('item2', 'assets/images/clown.png');
+        this.load.image('item1', 'assets/images/bottle.png');
+        this.load.image('item2', 'assets/images/fish.png');
         this.load.once('complete', () => {
             this.scene.start('example');
         });
