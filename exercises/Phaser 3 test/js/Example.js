@@ -23,7 +23,7 @@ class Example extends Phaser.Scene {
 
     create() {
         // Set world bounds
-        this.physics.world.setBounds(100, 275, 1620, 940);
+        this.physics.world.setBounds(100, 275, 1600, 920);
 
         // Add 2 groups for Bullet objects
         this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
@@ -40,7 +40,7 @@ class Example extends Phaser.Scene {
                 start: 0,
                 end: 19
             }),
-            frameRate: 6,
+            frameRate: 9,
             repeat: -1
         },);
 
@@ -111,7 +111,8 @@ class Example extends Phaser.Scene {
         this.crates = this.physics.add.group({
             key: 'crate',
             immovable: true,
-            quantity: 75
+            quantity: 60
+
         });
 
         this.crates.children.each(function (crate) {
@@ -209,6 +210,11 @@ class Example extends Phaser.Scene {
             }
         });
 
+        const text = this.add.text(150, -30, 'Find and eliminate 10 plastic bottles by shooting them', { fontFamily: 'Arial', fontSize: '24px', color: '#ffffff' });
+
+        this.add.text(200, 1220, 'Click to shoot', { fontFamily: 'Arial', fontSize: '24px', color: '#ffffff' }).setOrigin(0.5);
+        this.add.text(600, 1220, 'Spacebar to jump/dash', { fontFamily: 'Arial', fontSize: '24px', color: '#ffffff' }).setOrigin(0.5);
+        this.add.text(1000, 1220, 'ASDW to move', { fontFamily: 'Arial', fontSize: '24px', color: '#ffffff' }).setOrigin(0.5);
     }
 
     update(time, delta) {
@@ -295,7 +301,7 @@ class Example extends Phaser.Scene {
             else {
                 this.hp1.destroy();
 
-                // this.player.setPosition(1620, Phaser.Math.Between(275, 940));
+                this.player.setPosition(1620, Phaser.Math.Between(275, 940));
             }
 
             // Destroy bullet
@@ -358,12 +364,12 @@ class Example extends Phaser.Scene {
         this.item1.setPosition(x, y);
 
         // Display a copy of item1 at the top left of the screen
-        const copy = this.add.image(0, 0, 'item1').setOrigin(0, 0).setDisplaySize(50, 50);
+        const copy = this.add.image(200, 75, 'item1').setOrigin(0, 0).setDisplaySize(75, 75);
         this.item1Copies.add(copy);
 
         // Position the copies next to each other
         this.item1Copies.children.iterate((child, index) => {
-            child.x = index * 50; // Assuming 50 is the width of each copy
+            child.x = index * 75; // Assuming 50 is the width of each copy
         });
 
         // End the game if 10 item1 have been hit
