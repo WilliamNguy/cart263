@@ -26,14 +26,21 @@ class SecondScene extends Phaser.Scene {
 
         this.player.play('inflate-moving');
 
-        this.item2 = this.physics.add.sprite(Phaser.Math.Between(100, 700), Phaser.Math.Between(100, 500), 'item2');
-        this.item2.setDisplaySize(50, 50);
-        this.item2.setCollideWorldBounds(true);
+        this.item1Group = this.physics.add.group({
+            key: 'item1',
+            repeat: 5,
+        });
 
-        this.item2.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
-        this.item2.setBounce(1, 1);
+        this.item1Group.children.iterate(function (item) {
+            const x = Phaser.Math.Between(50, 750);
+            const y = Phaser.Math.Between(50, 550);
+            item.setPosition(x, y);
+            item.setDisplaySize(25, 25);
+            item.setCollideWorldBounds(true);
+            item.setBounce(1);
+        });
 
-        this.physics.add.overlap(this.player, this.item2, this.collectItem2, null, this);
+        this.physics.add.overlap(this.player, this.item1Group, this.collectItem1, null, this);
 
         // Bullets
         this.bullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
@@ -76,12 +83,41 @@ class SecondScene extends Phaser.Scene {
                 this.reticle.y += pointer.movementY;
             }
         });
+
+        this.input.on('pointerdown', (pointer) => {
+            this.isDragging = true;
+        });
+
+        this.input.on('pointerup', (pointer) => {
+            this.isDragging = false;
+        });
+
+        this.input.on('pointermove', (pointer) => {
+            if (this.isDragging) {
+                this.item1Group.children.iterate((item) => {
+                    if (item.active) {
+                        const angle = Phaser.Math.Angle.Between(item.x, item.y, this.player.x, this.player.y);
+                        item.setVelocity(Math.cos(angle) * 50, Math.sin(angle) * 50);
+                    }
+                });
+            }
+        });
     }
 
-    collectItem2(player, item2) {
+    pointermoveHandler(pointer) {
+        if (!this.isDragging) return;
 
-        item2.disableBody(true, true);
+        this.item1Group.children.iterate((item) => {
+            const dx = this.player.x - item.x;
+            const dy = this.player.y - item.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
+            item.body.setVelocity(dx / distance * 100, dy / distance * 100);
+        });
+    }
+
+    collectItem1(player, item1) {
+        item1.disableBody(true, true);
     }
 
     update() {
@@ -102,6 +138,12 @@ class SecondScene extends Phaser.Scene {
         if (this.player.x <= this.player.width / 2) {
             this.scene.start('thirdScene');  // Transition to ThirdScene
         }
+        this.item1Group.children.iterate(function (item) {
+            // Example: Randomly adjust velocity
+            if (Phaser.Math.FloatBetween(0, 1) < 0.01) {  // Occasionally change direction
+                item.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
+            }
+        });
     }
 
 }
