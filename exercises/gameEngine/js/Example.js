@@ -274,6 +274,9 @@ class Example extends Phaser.Scene {
 
             this.player.setPosition(x, y);
         }
+        if (this.player.x <= 145) {
+            this.scene.start('secondScene');
+        }
     }
 
     enemyHitCallback(enemyHit, bulletHit) {
@@ -327,12 +330,12 @@ class Example extends Phaser.Scene {
             // Get bullet from bullets group
             const bullet = this.enemyBullets.get().setActive(true).setVisible(true).setDisplaySize(45, 45);
 
-            if (bullet) {
-                bullet.fire(this.enemy, this.player);
+            // if (bullet) {
+            //     bullet.fire(this.enemy, this.player);
 
-                // Add collider between bullet and player
-                this.physics.add.collider(this.player, bullet, (playerHit, bulletHit) => this.playerHitCallback(playerHit, bulletHit));
-            }
+            //     // Add collider between bullet and player
+            //     this.physics.add.collider(this.player, bullet, (playerHit, bulletHit) => this.playerHitCallback(playerHit, bulletHit));
+            // }
         }
     }
 
@@ -397,6 +400,7 @@ class Example extends Phaser.Scene {
         this.cameras.main.fadeIn(1000);
 
     }
+
 
 }
 
