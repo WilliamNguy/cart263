@@ -8,7 +8,30 @@ class SecondScene extends Phaser.Scene {
         const background = this.add.image(400, 300, 'background');
         background.setOrigin(0.5, 0.5).setDisplaySize(800, 600);
 
+        this.item2Group = this.physics.add.group({
+            key: 'item2',
+            repeat: 2
+        });
+        const marginTopBottom = 50;
+        const usableHeight = 600 - (marginTopBottom * 2);
 
+        this.item2Group.children.iterate((item, index) => {
+            const x = 50;
+
+            const y = marginTopBottom + 100 + (usableHeight / this.item2Group.children.size) * index;
+            item.setPosition(x, y);
+            item.setDisplaySize(25, 25);
+            item.setCollideWorldBounds(true);
+            item.setVelocityX(75); // Start moving right
+            item.setBounce(1, 0); // Bounce only horizontally
+        });
+        this.physics.world.on('worldbounds', (body) => {
+            if (body.gameObject === this.item2) {
+                body.setVelocityX(body.velocity.x * - 1);
+            }
+        }, this);
+
+        this.physics.world.setBoundsCollision(true, true, true, true); // Enable collision for all sides
 
         // Player
         this.player = this.physics.add.sprite(400, 300, 'player_handgun');
@@ -26,20 +49,20 @@ class SecondScene extends Phaser.Scene {
 
         this.player.play('inflate-moving');
 
+
+
         this.item1Group = this.physics.add.group({
             key: 'item1',
             repeat: 5,
         });
-
         this.item1Group.children.iterate(function (item) {
             const x = Phaser.Math.Between(50, 750);
-            const y = Phaser.Math.Between(50, 550);
+            const y = Phaser.Math.Between(550, 600);
             item.setPosition(x, y);
             item.setDisplaySize(25, 25);
             item.setCollideWorldBounds(true);
             item.setBounce(1);
         });
-
         this.physics.add.overlap(this.player, this.item1Group, this.collectItem1, null, this);
 
         // Bullets
@@ -72,36 +95,44 @@ class SecondScene extends Phaser.Scene {
         // Set up the camera to follow the player
         this.cameras.main.startFollow(this.player);
         // Lock pointer on game canvas click
+
+        this.isDragging = false;
+        this.dragSensitivity = 20;  // Define a sensible default
+
         this.input.on('pointerdown', () => {
             this.game.canvas.requestPointerLock();
+            this.isDragging = true;
         });
 
         // Move reticle with locked pointer
+        this.input.on('pointerdown', (pointer) => {
+            this.game.canvas.requestPointerLock();
+            this.isDragging = true;  // Start dragging
+        });
+
+        this.input.on('pointerup', (pointer) => {
+            this.isDragging = false;  // Stop dragging
+        });
+
         this.input.on('pointermove', (pointer) => {
             if (this.input.mouse.locked) {
                 this.reticle.x += pointer.movementX;
                 this.reticle.y += pointer.movementY;
             }
-        });
 
-        this.input.on('pointerdown', (pointer) => {
-            this.isDragging = true;
-        });
-
-        this.input.on('pointerup', (pointer) => {
-            this.isDragging = false;
-        });
-
-        this.input.on('pointermove', (pointer) => {
             if (this.isDragging) {
+                console.log('Dragging now');
                 this.item1Group.children.iterate((item) => {
-                    if (item.active) {
-                        const angle = Phaser.Math.Angle.Between(item.x, item.y, this.player.x, this.player.y);
+                    const distance = Phaser.Math.Distance.Between(this.reticle.x, this.reticle.y, item.x, item.y);
+                    console.log('Distance to item: ', distance);  // Check the computed distance
+                    if (distance <= this.dragSensitivity) {
+                        const angle = Phaser.Math.Angle.Between(item.x, item.y, this.reticle.x, this.reticle.y);
                         item.setVelocity(Math.cos(angle) * 50, Math.sin(angle) * 50);
                     }
                 });
             }
         });
+
     }
 
     pointermoveHandler(pointer) {
@@ -138,12 +169,11 @@ class SecondScene extends Phaser.Scene {
         if (this.player.x <= this.player.width / 2) {
             this.scene.start('thirdScene');  // Transition to ThirdScene
         }
-        this.item1Group.children.iterate(function (item) {
-            // Example: Randomly adjust velocity
-            if (Phaser.Math.FloatBetween(0, 1) < 0.01) {  // Occasionally change direction
-                item.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
-            }
-        });
+        // this.item1Group.children.iterate(function (item) {
+        //     if (Phaser.Math.FloatBetween(0, 1) < 0.01) {  // Occasionally change direction
+        //         item.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
+        //     }
+        // });
     }
 
 }
