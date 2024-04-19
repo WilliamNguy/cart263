@@ -4,9 +4,13 @@ class ThirdScene extends Phaser.Scene {
     }
 
     create() {
+
+        this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
+
         // Background
         const background = this.add.image(400, 300, 'background');
         background.setOrigin(0.5, 0.5).setDisplaySize(800, 600);
+
 
         // Player
         this.player = this.physics.add.sprite(400, 300, 'player_handgun');
@@ -22,14 +26,13 @@ class ThirdScene extends Phaser.Scene {
         },);
         this.player.play('inflate-moving');
 
+
         this.enemy = this.physics.add.sprite(50, 300, 'enemy_handgun'); // Spawns on the left side, vertically centered
         this.enemy.setCollideWorldBounds(true);
         this.enemy.setDisplaySize(50, 50);
         this.enemy.setVelocity(0);
         this.physics.add.collider(this.player, this.enemy);
 
-        // Bullets
-        this.bullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
 
         // Movement Keys
         this.moveKeys = this.input.keyboard.addKeys({
@@ -37,6 +40,18 @@ class ThirdScene extends Phaser.Scene {
             down: Phaser.Input.Keyboard.KeyCodes.S,
             left: Phaser.Input.Keyboard.KeyCodes.A,
             right: Phaser.Input.Keyboard.KeyCodes.D
+        });
+
+        this.input.on('pointerdown', (pointer, time, lastFired) => {
+            if (this.player.active === false) { return; }
+
+            // Get bullet from bullets group
+            const bullet = this.playerBullets.get().setActive(true).setVisible(true).setDisplaySize(45, 45);
+
+            if (bullet) {
+                bullet.fire(this.player, this.reticle);
+                // this.physics.add.collider(this.enemy, bullet, (enemyHit, bulletHit) => this.enemyHitCallback(enemyHit, bulletHit));
+            }
         });
 
         // Pointer Lock for Mouse Control
@@ -69,7 +84,12 @@ class ThirdScene extends Phaser.Scene {
                 this.reticle.y += pointer.movementY;
             }
         });
+
     }
+
+
+
+
 
     update() {
         this.player.body.setVelocity(0);
@@ -96,5 +116,7 @@ class ThirdScene extends Phaser.Scene {
 
         this.enemy.setVelocityX(Math.cos(angle) * 50);
         this.enemy.setVelocityY(Math.sin(angle) * 50);
+
+        this.enemy.rotation = angle;
     }
 }
