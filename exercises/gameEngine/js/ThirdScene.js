@@ -11,7 +11,6 @@ class ThirdScene extends Phaser.Scene {
         // Player
         this.player = this.physics.add.sprite(400, 300, 'player_handgun');
         this.player.setCollideWorldBounds(true);
-
         this.anims.create({
             key: 'inflate-moving',
             frames: this.anims.generateFrameNumbers('player_handgun', {
@@ -21,9 +20,13 @@ class ThirdScene extends Phaser.Scene {
             frameRate: 9,
             repeat: -1
         },);
-
         this.player.play('inflate-moving');
 
+        this.enemy = this.physics.add.sprite(50, 300, 'enemy_handgun'); // Spawns on the left side, vertically centered
+        this.enemy.setCollideWorldBounds(true);
+        this.enemy.setDisplaySize(50, 50);
+        this.enemy.setVelocity(0);
+        this.physics.add.collider(this.player, this.enemy);
 
         // Bullets
         this.bullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
@@ -83,5 +86,15 @@ class ThirdScene extends Phaser.Scene {
             this.player.setVelocityY(160);
         }
         this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
+
+        this.adjustEnemyMovement();
+
+    }
+
+    adjustEnemyMovement() {
+        var angle = Phaser.Math.Angle.Between(this.enemy.x, this.enemy.y, this.player.x, this.player.y);
+
+        this.enemy.setVelocityX(Math.cos(angle) * 50);
+        this.enemy.setVelocityY(Math.sin(angle) * 50);
     }
 }

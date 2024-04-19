@@ -8,13 +8,26 @@ class SecondScene extends Phaser.Scene {
         const background = this.add.image(400, 300, 'background');
         background.setOrigin(0.5, 0.5).setDisplaySize(800, 600);
 
+        this.enemies = this.physics.add.group({
+            key: 'enemy_handgun',
+            repeat: 5,
+        });
+        this.enemies.children.iterate((enemy) => {
+            const x = Phaser.Math.Between(50, 750); // Randomize x within the game width
+            const y = Phaser.Math.Between(100, 500); // Randomize y within the specified range
+            enemy.setPosition(x, y);
+            enemy.setDisplaySize(25, 25);
+            enemy.setCollideWorldBounds(true);
+            enemy.setBounce(1);  // Make enemies bounce off boundaries
+            this.randomizeEnemyMovement(enemy);  // Assign random initial movement
+        });
+
         this.item2Group = this.physics.add.group({
             key: 'item2',
             repeat: 2
         });
         const marginTopBottom = 50;
         const usableHeight = 600 - (marginTopBottom * 2);
-
         this.item2Group.children.iterate((item, index) => {
             const x = 50;
 
@@ -150,6 +163,9 @@ class SecondScene extends Phaser.Scene {
     collectItem1(player, item1) {
         item1.disableBody(true, true);
     }
+    randomizeEnemyMovement(enemy) {
+        enemy.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
+    }
 
     update() {
         this.player.body.setVelocity(0);
@@ -169,11 +185,20 @@ class SecondScene extends Phaser.Scene {
         if (this.player.x <= this.player.width / 2) {
             this.scene.start('thirdScene');  // Transition to ThirdScene
         }
-        // this.item1Group.children.iterate(function (item) {
-        //     if (Phaser.Math.FloatBetween(0, 1) < 0.01) {  // Occasionally change direction
-        //         item.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
-        //     }
-        // });
+        this.enemies.children.iterate((enemy) => {
+            // Check if any enemy reaches y=100 and reverse its vertical velocity
+            if (enemy.y <= 100 && enemy.body.velocity.y < 0) {
+                enemy.body.velocity.y *= -1;
+            }
+            if (enemy.y >= 500 && enemy.body.velocity.y > 0) {
+                enemy.body.velocity.y *= -1;
+            }
+        });
+        this.item1Group.children.iterate(function (item) {
+            if (Phaser.Math.FloatBetween(0, 1) < 0.01) {  // Occasionally change direction
+                item.setVelocity(Phaser.Math.Between(-10, 10), Phaser.Math.Between(-10, 10));
+            }
+        });
     }
 
 }
