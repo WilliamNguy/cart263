@@ -90,27 +90,28 @@ class ThirdScene extends Phaser.Scene {
     }
 
     bulletHitsEnemy(enemy, bullet) {
+        if (!bullet.active || !enemy.active) return;
+
         bullet.setActive(false);
         bullet.setVisible(false);
         bullet.destroy();
-
         //Distance between bullet adn enemy
         const angle = Phaser.Math.Angle.Between(bullet.x, bullet.y, enemy.x, enemy.y);
 
         // Pushes the enemy back 
-        enemy.x += Math.cos(angle) * 25;
-        enemy.y += Math.sin(angle) * 25;
+        enemy.x += Math.cos(angle) * 35;
+        enemy.y += Math.sin(angle) * 35;
 
     }
 
     fireBullet() {
-        const bullet = this.playerBullets.get(this.player.x, this.player.y, 'bullet');
+        const bullet = this.playerBullets.get(true, this.player.x, this.player.y);
         if (bullet) {
             bullet.setActive(true);
             bullet.setVisible(true);
             const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
             bullet.setRotation(angle);
-            this.physics.velocityFromRotation(angle, 400, bullet.body.velocity);  // Ensure bullet speed is consistent
+            this.physics.velocityFromRotation(angle, 400, bullet.body.velocity);
         }
     }
 
@@ -118,6 +119,10 @@ class ThirdScene extends Phaser.Scene {
 
 
     update() {
+
+        this.physics.world.collide(this.playerBullets, this.enemy, this.bulletHitsEnemy, null, this);
+
+
         this.player.body.setVelocity(0);
 
         if (this.moveKeys.left.isDown) {
