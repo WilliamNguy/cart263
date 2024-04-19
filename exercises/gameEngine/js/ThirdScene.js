@@ -84,9 +84,35 @@ class ThirdScene extends Phaser.Scene {
                 this.reticle.y += pointer.movementY;
             }
         });
+        //collision between bullet and enemy
+        this.physics.add.collider(this.playerBullets, this.enemy, this.bulletHitsEnemy, null, this);
 
     }
 
+    bulletHitsEnemy(enemy, bullet) {
+        bullet.setActive(false);
+        bullet.setVisible(false);
+        bullet.destroy();
+
+        //Distance between bullet adn enemy
+        const angle = Phaser.Math.Angle.Between(bullet.x, bullet.y, enemy.x, enemy.y);
+
+        // Pushes the enemy back 
+        enemy.x += Math.cos(angle) * 25;
+        enemy.y += Math.sin(angle) * 25;
+
+    }
+
+    fireBullet() {
+        const bullet = this.playerBullets.get(this.player.x, this.player.y, 'bullet');
+        if (bullet) {
+            bullet.setActive(true);
+            bullet.setVisible(true);
+            const angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
+            bullet.setRotation(angle);
+            this.physics.velocityFromRotation(angle, 400, bullet.body.velocity);  // Ensure bullet speed is consistent
+        }
+    }
 
 
 
