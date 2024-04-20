@@ -5,7 +5,7 @@ class SecondScene extends Phaser.Scene {
 
     create() {
         // Background
-        const background = this.add.image(400, 300, 'background');
+        const background = this.add.image(400, 300, 'background2');
         background.setOrigin(0.5, 0.5).setDisplaySize(800, 600);
 
         this.enemies = this.physics.add.group({

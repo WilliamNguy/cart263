@@ -8,7 +8,7 @@ class ThirdScene extends Phaser.Scene {
         this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
 
         // Background
-        const background = this.add.image(400, 300, 'background');
+        const background = this.add.image(400, 300, 'background3');
         background.setOrigin(0.5, 0.5).setDisplaySize(800, 600);
 
 
