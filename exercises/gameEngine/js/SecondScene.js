@@ -1,12 +1,24 @@
 class SecondScene extends Phaser.Scene {
     constructor() {
         super({ key: 'secondScene' });
+        this.dolphin = null;  // Define the dolphin as a class property
+
     }
 
     create() {
         // Background
         const background = this.add.image(400, 300, 'background2');
         background.setOrigin(0.5, 0.5).setDisplaySize(800, 600);
+
+        this.anims.create({
+            key: 'dolphin-moving',
+            frames: this.anims.generateFrameNumbers('dolphin', {
+                start: 0,
+                end: 10
+            }),
+            frameRate: 8,
+            repeat: -1
+        },);
 
         this.enemies = this.physics.add.group({
             key: 'enemy_handgun',
@@ -22,8 +34,10 @@ class SecondScene extends Phaser.Scene {
             this.randomizeEnemyMovement(enemy);  // Assign random initial movement
         });
 
+
+
         this.item2Group = this.physics.add.group({
-            key: 'item2',
+            key: 'dolphin',
             repeat: 2
         });
         const marginTopBottom = 50;
@@ -33,21 +47,37 @@ class SecondScene extends Phaser.Scene {
 
             const y = marginTopBottom + 100 + (usableHeight / this.item2Group.children.size) * index;
             item.setPosition(x, y);
-            item.setDisplaySize(25, 25);
+            item.setDisplaySize(100, 50);
             item.setCollideWorldBounds(true);
             item.setVelocityX(75); // Start moving right
             item.setBounce(1, 0); // Bounce only horizontally
+            item.play('dolphin-moving');
+            this.physics.world.on('update', () => {
+                if (this.dolphin.x >= 1400) {
+                    this.flipAndRotateDolphin();
+                } else if (this.dolphin.x <= 50) {
+                    this.flipAndRotateDolphin(true);
+                }
+            });
+
+
         });
+        this.physics.add.overlap(this.item2Group, this.item1Group, this.handleDolphinItemCollision, null, this);
+
+
         this.physics.world.on('worldbounds', (body) => {
-            if (body.gameObject === this.item2) {
-                body.setVelocityX(body.velocity.x * - 1);
+            if (this.item2Group.contains(body.gameObject)) {
+                // Flip the dolphin when it hits the world bounds
+                body.gameObject.setFlipX(body.velocity.x < 0);
             }
-        }, this);
+        });
+
+
 
         this.physics.world.setBoundsCollision(true, true, true, true); // Enable collision for all sides
 
         // Player
-        this.player = this.physics.add.sprite(400, 300, 'player_handgun');
+        this.player = this.physics.add.sprite(365, 60, 'player_handgun');
         this.player.setCollideWorldBounds(true);
 
         this.anims.create({
@@ -145,7 +175,39 @@ class SecondScene extends Phaser.Scene {
                 });
             }
         });
+        this.physics.add.collider(this.player, this.item2Group, this.playerHitsDolphin, null, this);
+        this.physics.add.collider(this.item1Group, this.item2Group, this.item1HitsDolphin, null, this);
 
+
+
+    }
+
+    item1HitsDolphin(item1, dolphin) {
+        // Handle what happens when an item1 collides with a dolphin
+        console.log('Item1 has collided with a dolphin!');
+
+        // Example actions to take on collision
+        dolphin.disableBody(true, true);  // This will disable and hide the dolphin
+        // Optionally, you could also disable the item1 if needed
+        // item1.disableBody(true, true);
+    }
+
+    flipAndRotateDolphin(reset = false) {
+        if (!this.dolphin || !this.dolphin.body) return; // Safety check to ensure dolphin exists
+
+        this.dolphin.setVelocityX(-this.dolphin.body.velocity.x); // Reverse velocity
+        this.dolphin.setFlipX(this.dolphin.body.velocity.x < 0); // Flip based on direction
+
+        // Remove any existing tweens to prevent conflicts
+        this.tweens.killTweensOf(this.dolphin);
+
+        // Create a new tween to rotate the dolphin
+        this.tweens.add({
+            targets: this.dolphin,
+            angle: reset ? 0 : 180, // Rotate to 180 degrees or reset to 0
+            duration: 500, // Animation duration in milliseconds
+            ease: 'Sine.easeInOut'
+        });
     }
 
     pointermoveHandler(pointer) {
@@ -168,6 +230,7 @@ class SecondScene extends Phaser.Scene {
     }
 
     update() {
+
         this.player.body.setVelocity(0);
 
         if (this.moveKeys.left.isDown) {
@@ -199,6 +262,17 @@ class SecondScene extends Phaser.Scene {
                 item.setVelocity(Phaser.Math.Between(-10, 10), Phaser.Math.Between(-10, 10));
             }
         });
+
+        if (this.dolphin && this.dolphin.body) {
+            // Check the boundary at the left side
+            if (this.dolphin.x <= 50 && this.dolphin.body.velocity.x < 0) {
+                this.flipAndRotateDolphin(true);
+            }
+            // Additional conditions for the right boundary if needed
+            if (this.dolphin.x >= 1400 && this.dolphin.body.velocity.x > 0) {
+                this.flipAndRotateDolphin();
+            }
+        }
     }
 
 }

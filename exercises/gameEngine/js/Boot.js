@@ -13,6 +13,13 @@ class Boot extends Phaser.Scene {
         this.load.spritesheet('enemy_handgun', 'assets/images/evil.png',
             { frameWidth: 32, frameHeight: 32, endFrame: 19 }
         );
+        this.load.spritesheet('shark', 'assets/images/shark.png',
+            { frameWidth: 64, frameHeight: 32, endFrame: 10 }
+        );
+        this.load.spritesheet('dolphin', 'assets/images/dolphin.png',
+            { frameWidth: 64, frameHeight: 32, endFrame: 10 }
+        );
+
         this.load.image('bullet', 'assets/images/laser.png');
         this.load.image('target', 'assets/images/mouse.png');
         this.load.image('background', 'assets/images/ocean.jpeg');

@@ -27,12 +27,21 @@ class ThirdScene extends Phaser.Scene {
         this.player.play('inflate-moving');
 
 
-        this.enemy = this.physics.add.sprite(50, 300, 'enemy_handgun'); // Spawns on the left side, vertically centered
+        this.enemy = this.physics.add.sprite(50, 300, 'shark'); // Spawns on the left side, vertically centered
         this.enemy.setCollideWorldBounds(true);
-        this.enemy.setDisplaySize(50, 50);
+        this.enemy.setDisplaySize(100, 50);
         this.enemy.setVelocity(0);
         this.physics.add.collider(this.player, this.enemy);
-
+        this.anims.create({
+            key: 'shark-moving',
+            frames: this.anims.generateFrameNumbers('shark', {
+                start: 0,
+                end: 10
+            }),
+            frameRate: 8,
+            repeat: -1
+        },);
+        this.enemy.play('shark-moving');
 
         // Movement Keys
         this.moveKeys = this.input.keyboard.addKeys({
