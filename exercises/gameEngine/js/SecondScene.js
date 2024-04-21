@@ -215,6 +215,7 @@ class SecondScene extends Phaser.Scene {
 
     }
 
+
     randomizeDolphinMovement(dolphin) {
         const speed = Phaser.Math.Between(50, 150); // Random speed
         const angle = Phaser.Math.FloatBetween(0, 2 * Math.PI); // Random angle

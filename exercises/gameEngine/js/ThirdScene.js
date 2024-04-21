@@ -13,18 +13,28 @@ class ThirdScene extends Phaser.Scene {
 
 
         // Player
-        this.player = this.physics.add.sprite(400, 300, 'player_handgun');
+        this.player = this.physics.add.sprite(400, 300, 'player3');
         this.player.setCollideWorldBounds(true);
         this.anims.create({
-            key: 'inflate-moving',
-            frames: this.anims.generateFrameNumbers('player_handgun', {
+            key: 'player-moving',
+            frames: this.anims.generateFrameNumbers('player3', {
                 start: 0,
                 end: 19
             }),
             frameRate: 9,
             repeat: -1
         },);
-        this.player.play('inflate-moving');
+        this.player.play('player-moving');
+
+        this.anims.create({
+            key: 'wave-moving',
+            frames: this.anims.generateFrameNumbers('wave', {
+                start: 0,
+                end: 10
+            }),
+            frameRate: 8,
+            repeat: -1
+        });
 
 
         this.enemy = this.physics.add.sprite(50, 300, 'shark'); // Spawns on the left side, vertically centered
@@ -54,12 +64,9 @@ class ThirdScene extends Phaser.Scene {
         this.input.on('pointerdown', (pointer, time, lastFired) => {
             if (this.player.active === false) { return; }
 
-            // Get bullet from bullets group
-            const bullet = this.playerBullets.get().setActive(true).setVisible(true).setDisplaySize(45, 45);
-
+            const bullet = this.playerBullets.get().setActive(true).setVisible(true);
             if (bullet) {
-                bullet.fire(this.player, this.reticle);
-                // this.physics.add.collider(this.enemy, bullet, (enemyHit, bulletHit) => this.enemyHitCallback(enemyHit, bulletHit));
+                bullet.fire(this.player, this.reticle, 0.1);
             }
         });
 
