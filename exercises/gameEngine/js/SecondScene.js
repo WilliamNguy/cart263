@@ -20,8 +20,18 @@ class SecondScene extends Phaser.Scene {
             repeat: -1
         },);
 
+        this.anims.create({
+            key: 'turtle-moving',
+            frames: this.anims.generateFrameNumbers('turtle', {
+                start: 0,
+                end: 10
+            }),
+            frameRate: 8,
+            repeat: -1
+        },);
+
         this.enemies = this.physics.add.group({
-            key: 'enemy_handgun',
+            key: 'turlte',
             repeat: 5,
         });
         this.enemies.children.iterate((enemy) => {
@@ -31,8 +41,13 @@ class SecondScene extends Phaser.Scene {
             enemy.setDisplaySize(25, 25);
             enemy.setCollideWorldBounds(true);
             enemy.setBounce(1);  // Make enemies bounce off boundaries
+            enemy.play('turtle-moving');
             this.randomizeEnemyMovement(enemy);  // Assign random initial movement
+
+            enemy.rotation = Phaser.Math.FloatBetween(0, 2 * Math.PI);
+
         });
+
 
 
 
@@ -44,22 +59,23 @@ class SecondScene extends Phaser.Scene {
         const usableHeight = 600 - (marginTopBottom * 2);
         this.item2Group.children.iterate((item, index) => {
             const x = 50;
-
-            const y = marginTopBottom + 100 + (usableHeight / this.item2Group.children.size) * index;
+            const y = Phaser.Math.Between(100, 500); // Ensuring Y is always below 600 and above 100
             item.setPosition(x, y);
             item.setDisplaySize(100, 50);
             item.setCollideWorldBounds(true);
             item.setVelocityX(75); // Start moving right
-            item.setBounce(1, 0); // Bounce only horizontally
+            item.setBounce(1, 1); // Bounce only horizontally
             item.play('dolphin-moving');
-            this.physics.world.on('update', () => {
-                if (this.dolphin.x >= 1400) {
-                    this.flipAndRotateDolphin();
-                } else if (this.dolphin.x <= 50) {
-                    this.flipAndRotateDolphin(true);
-                }
-            });
+            this.randomizeDolphinMovement(item);
 
+
+            this.time.addEvent({
+                delay: 2000,
+                callback: () => {
+                    this.item2Group.children.iterate(this.randomizeDolphinMovement, this);
+                },
+                loop: true
+            });
 
         });
         this.physics.add.overlap(this.item2Group, this.item1Group, this.handleDolphinItemCollision, null, this);
@@ -100,7 +116,7 @@ class SecondScene extends Phaser.Scene {
         });
         this.item1Group.children.iterate(function (item) {
             const x = Phaser.Math.Between(50, 750);
-            const y = Phaser.Math.Between(550, 600);
+            const y = Phaser.Math.Between(575, 600);
             item.setPosition(x, y);
             item.setDisplaySize(25, 25);
             item.setCollideWorldBounds(true);
@@ -177,9 +193,19 @@ class SecondScene extends Phaser.Scene {
         });
         this.physics.add.collider(this.player, this.item2Group, this.playerHitsDolphin, null, this);
         this.physics.add.collider(this.item1Group, this.item2Group, this.item1HitsDolphin, null, this);
+        this.physics.add.overlap(this.item1Group, this.handleCollision, null, this);
 
 
 
+
+    }
+
+    randomizeDolphinMovement(dolphin) {
+        const speed = Phaser.Math.Between(50, 150); // Random speed
+        const angle = Phaser.Math.FloatBetween(0, 2 * Math.PI); // Random angle
+        dolphin.setVelocityX(Math.cos(angle) * speed);
+        dolphin.setVelocityY(Math.sin(angle) * speed);
+        dolphin.rotation = angle; // Optionally set rotation to face the movement direction
     }
 
     item1HitsDolphin(item1, dolphin) {
@@ -221,7 +247,9 @@ class SecondScene extends Phaser.Scene {
             item.body.setVelocity(dx / distance * 100, dy / distance * 100);
         });
     }
-
+    handleCollision(turtle, item1) {
+        turtle.disableBody(true, true); // Disables and hides the turtle
+    }
     collectItem1(player, item1) {
         item1.disableBody(true, true);
     }
@@ -263,16 +291,16 @@ class SecondScene extends Phaser.Scene {
             }
         });
 
-        if (this.dolphin && this.dolphin.body) {
-            // Check the boundary at the left side
-            if (this.dolphin.x <= 50 && this.dolphin.body.velocity.x < 0) {
-                this.flipAndRotateDolphin(true);
+        this.item2Group.children.iterate((dolphin) => {
+            // Restrict dolphins to the specified y range
+            if (dolphin.y < 100) {
+                dolphin.y = 100;
+                dolphin.setVelocityY(Math.abs(dolphin.body.velocity.y)); // Ensure positive velocity downwards
+            } else if (dolphin.y > 500) {
+                dolphin.y = 500;
+                dolphin.setVelocityY(-Math.abs(dolphin.body.velocity.y)); // Ensure negative velocity upwards
             }
-            // Additional conditions for the right boundary if needed
-            if (this.dolphin.x >= 1400 && this.dolphin.body.velocity.x > 0) {
-                this.flipAndRotateDolphin();
-            }
-        }
+        });
     }
 
 }

@@ -19,7 +19,9 @@ class Boot extends Phaser.Scene {
         this.load.spritesheet('dolphin', 'assets/images/dolphin.png',
             { frameWidth: 64, frameHeight: 32, endFrame: 10 }
         );
-
+        this.load.spritesheet('turtle', 'assets/images/turtle.png',
+            { frameWidth: 64, frameHeight: 64, endFrame: 10 }
+        );
         this.load.image('bullet', 'assets/images/laser.png');
         this.load.image('target', 'assets/images/mouse.png');
         this.load.image('background', 'assets/images/ocean.jpeg');
