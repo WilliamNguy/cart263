@@ -2,6 +2,9 @@ class SecondScene extends Phaser.Scene {
     constructor() {
         super({ key: 'secondScene' });
         this.dolphin = null;  // Define the dolphin as a class property
+        this.totalItems = 5; // Total number of item1 
+        this.collectedItemsCount = 0;
+
 
     }
 
@@ -204,14 +207,21 @@ class SecondScene extends Phaser.Scene {
                 });
             }
         });
+
+        // Text for end screen message
+        this.endMessage = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Hello', {
+            fontSize: '40px',
+            color: '#ffffff', // White color for the text
+            backgroundColor: '#000000', // Black background
+            padding: { left: 10, right: 10, top: 5, bottom: 5 } // Optional padding for better visibility
+        })
+            .setOrigin(0.5)
+            .setAlpha(0); // Initially invisible
+
         this.physics.add.collider(this.player, this.item2Group, this.playerHitsDolphin, null, this);
         this.physics.add.collider(this.item1Group, this.item2Group, this.item1HitsDolphin, null, this);
         this.physics.add.overlap(this.item1Group, this.handleCollision, null, this);
         this.physics.add.collider(this.enemies, this.item1Group, this.handleEnemyItemCollision, null, this);
-
-
-
-
 
     }
 
@@ -266,8 +276,18 @@ class SecondScene extends Phaser.Scene {
     handleCollision(turtle, item1) {
         turtle.disableBody(true, true); // Disables and hides the turtle
     }
+    displayCollectedItem() {
+        let iconX = 10 + (30 * this.collectedItemsCount);
+        let icon = this.add.image(iconX, 20, 'straw').setDisplaySize(50, 50); // Display the icon at the top left
+        this.collectedItemsCount++;
+    }
     collectItem1(player, item1) {
         item1.disableBody(true, true);
+        this.displayCollectedItem(); // Display an icon for the collected item
+
+        if (this.collectedItemsCount >= this.totalItems) { // Fixed the condition to use the correct variable
+            this.endGame();
+        }
     }
     randomizeEnemyMovement(enemy) {
         enemy.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
@@ -279,7 +299,10 @@ class SecondScene extends Phaser.Scene {
         enemy.disableBody(true, true); // This will disable and hide the enemy
         item.disableBody(true, true);  // This could also disable and hide the item
     }
-
+    endGame() {
+        // Once the required number of items are collected, go to the new scene
+        this.scene.start('textScene3'); // Transition to a new scene
+    }
     update() {
 
         this.player.body.setVelocity(0);

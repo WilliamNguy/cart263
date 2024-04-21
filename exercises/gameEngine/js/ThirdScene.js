@@ -1,9 +1,11 @@
 class ThirdScene extends Phaser.Scene {
     constructor() {
         super({ key: 'thirdScene' });
+        this.collectedItemsCount = 0;
     }
 
     create() {
+        this.collectedItemsDisplay = []; // Array to hold collected items
 
         this.playerBullets = this.physics.add.group({ classType: Wave, runChildUpdate: true });
 
@@ -52,6 +54,30 @@ class ThirdScene extends Phaser.Scene {
             repeat: -1
         },);
         this.enemy.play('shark-moving');
+
+        this.anims.create({
+            key: 'therm-moving',
+            frames: this.anims.generateFrameNumbers('therm', {
+                start: 0,
+                end: 28
+            }),
+            frameRate: 8,
+            repeat: -1
+        },);
+
+        this.item1Group = this.physics.add.group({
+            key: 'therm',
+            repeat: 4 // Create 5 items (0 index base + 1 extra from repeat)
+        });
+
+        this.item1Group.children.iterate((item) => {
+            const x = Phaser.Math.Between(10, 750);
+            const y = Phaser.Math.Between(200, 600);
+            item.setPosition(x, y).setDisplaySize(25, 25).setCollideWorldBounds(true).setBounce(1);
+            item.play('therm-moving'); // Play the animation
+
+        });
+        this.physics.add.overlap(this.playerBullets, this.item1Group, this.bulletHitsItem, null, this);
 
         // Movement Keys
         this.moveKeys = this.input.keyboard.addKeys({
@@ -102,8 +128,24 @@ class ThirdScene extends Phaser.Scene {
         });
         //collision between bullet and enemy
         this.physics.add.collider(this.playerBullets, this.enemy, this.bulletHitsEnemy, null, this);
+        this.physics.add.overlap(this.player, this.item1Group, this.collectItem1, null, this);
+
 
     }
+    collectItem1(player, item1) {
+
+        item1.disableBody(true, true);
+        this.collectedItemsCount++;
+        this.displayCollectedItem(item1.x, item1.y);
+    }
+    displayCollectedItem(x, y) {
+        //for the collected item at the top left
+        let iconX = 10 + (30 * this.collectedItemsCount); //in line next to each other
+        let icon = this.add.image(iconX, 20, 'therm', 15).setDisplaySize(25, 25);
+        this.collectedItemsDisplay.push(icon);
+
+    }
+
 
     bulletHitsEnemy(enemy, bullet) {
         if (!bullet.active || !enemy.active) return;

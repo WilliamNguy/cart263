@@ -31,6 +31,9 @@ class Boot extends Phaser.Scene {
         this.load.spritesheet('player3', 'assets/images/player3.png',
             { frameWidth: 64, frameHeight: 64, endFrame: 10 }
         );
+        this.load.spritesheet('therm', 'assets/images/therm.png',
+            { frameWidth: 64, frameHeight: 64, endFrame: 28 }
+        );
         this.load.image('bullet', 'assets/images/laser.png');
 
         this.load.image('target', 'assets/images/mouse.png');
