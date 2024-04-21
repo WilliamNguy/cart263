@@ -30,6 +30,16 @@ class SecondScene extends Phaser.Scene {
             repeat: -1
         },);
 
+        this.anims.create({
+            key: 'straw-moving',
+            frames: this.anims.generateFrameNumbers('straw', {
+                start: 0,
+                end: 10
+            }),
+            frameRate: 8,
+            repeat: -1
+        },);
+
         this.enemies = this.physics.add.group({
             key: 'turlte',
             repeat: 5,
@@ -47,6 +57,7 @@ class SecondScene extends Phaser.Scene {
             enemy.rotation = Phaser.Math.FloatBetween(0, 2 * Math.PI);
 
         });
+
 
 
 
@@ -111,16 +122,18 @@ class SecondScene extends Phaser.Scene {
 
 
         this.item1Group = this.physics.add.group({
-            key: 'item1',
+            key: 'straw',
             repeat: 5,
         });
         this.item1Group.children.iterate(function (item) {
             const x = Phaser.Math.Between(50, 750);
             const y = Phaser.Math.Between(575, 600);
             item.setPosition(x, y);
-            item.setDisplaySize(25, 25);
+            item.setDisplaySize(45, 45);
             item.setCollideWorldBounds(true);
             item.setBounce(1);
+            item.play('straw-moving');
+
         });
         this.physics.add.overlap(this.player, this.item1Group, this.collectItem1, null, this);
 
@@ -194,6 +207,8 @@ class SecondScene extends Phaser.Scene {
         this.physics.add.collider(this.player, this.item2Group, this.playerHitsDolphin, null, this);
         this.physics.add.collider(this.item1Group, this.item2Group, this.item1HitsDolphin, null, this);
         this.physics.add.overlap(this.item1Group, this.handleCollision, null, this);
+        this.physics.add.collider(this.enemies, this.item1Group, this.handleEnemyItemCollision, null, this);
+
 
 
 
@@ -210,7 +225,7 @@ class SecondScene extends Phaser.Scene {
 
     item1HitsDolphin(item1, dolphin) {
         // Handle what happens when an item1 collides with a dolphin
-        console.log('Item1 has collided with a dolphin!');
+        console.log('straw has collided with a dolphin!');
 
         // Example actions to take on collision
         dolphin.disableBody(true, true);  // This will disable and hide the dolphin
@@ -255,6 +270,13 @@ class SecondScene extends Phaser.Scene {
     }
     randomizeEnemyMovement(enemy) {
         enemy.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-100, 100));
+    }
+
+    handleEnemyItemCollision(enemy, item) {
+        console.log('An enemy has collided with item1!');
+        // Add any specific logic here, for example:
+        enemy.disableBody(true, true); // This will disable and hide the enemy
+        item.disableBody(true, true);  // This could also disable and hide the item
     }
 
     update() {

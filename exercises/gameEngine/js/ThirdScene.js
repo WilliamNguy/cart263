@@ -5,7 +5,7 @@ class ThirdScene extends Phaser.Scene {
 
     create() {
 
-        this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
+        this.playerBullets = this.physics.add.group({ classType: Wave, runChildUpdate: true });
 
         // Background
         const background = this.add.image(400, 300, 'background3');
