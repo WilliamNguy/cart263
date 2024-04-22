@@ -15,8 +15,9 @@ class ThirdScene extends Phaser.Scene {
 
 
         // Player
-        this.player = this.physics.add.sprite(400, 300, 'player3');
+        this.player = this.physics.add.sprite(600, 300, 'player3');
         this.player.setCollideWorldBounds(true);
+
         this.anims.create({
             key: 'player-moving',
             frames: this.anims.generateFrameNumbers('player3', {
@@ -43,7 +44,7 @@ class ThirdScene extends Phaser.Scene {
         this.enemy.setCollideWorldBounds(true);
         this.enemy.setDisplaySize(100, 50);
         this.enemy.setVelocity(0);
-        this.physics.add.collider(this.player, this.enemy);
+        // this.physics.add.collider(this.player, this.enemy);
         this.anims.create({
             key: 'shark-moving',
             frames: this.anims.generateFrameNumbers('shark', {
@@ -126,17 +127,32 @@ class ThirdScene extends Phaser.Scene {
                 this.reticle.y += pointer.movementY;
             }
         });
+        // this.physics.world.createDebugGraphic();
+
         //collision between bullet and enemy
         this.physics.add.collider(this.playerBullets, this.enemy, this.bulletHitsEnemy, null, this);
         this.physics.add.overlap(this.player, this.item1Group, this.collectItem1, null, this);
+        this.physics.add.overlap(this.player, this.enemy, this.handlePlayerEnemyCollision, null, this);
+
 
 
     }
-    collectItem1(player, item1) {
 
+    handlePlayerEnemyCollision(player, enemy) {
+
+        console.log('Player has been caught by the enemy!');
+        this.scene.start('failedScene2');
+    }
+    collectItem1(player, item1) {
+        console.log('Collecting item:', item1); // Debug log to check if this function gets called
         item1.disableBody(true, true);
         this.collectedItemsCount++;
         this.displayCollectedItem(item1.x, item1.y);
+
+        if (this.collectedItemsCount >= 5) { // Check if all items are collected
+            console.log('All items collected, transitioning to victory screen!');
+            this.scene.start('victoryScreen');
+        }
     }
     displayCollectedItem(x, y) {
         //for the collected item at the top left
@@ -157,8 +173,8 @@ class ThirdScene extends Phaser.Scene {
         const angle = Phaser.Math.Angle.Between(bullet.x, bullet.y, enemy.x, enemy.y);
 
         // Pushes the enemy back 
-        enemy.x += Math.cos(angle) * 35;
-        enemy.y += Math.sin(angle) * 35;
+        enemy.x += Math.cos(angle) * 50;
+        enemy.y += Math.sin(angle) * 50;
 
     }
 
@@ -184,15 +200,16 @@ class ThirdScene extends Phaser.Scene {
         this.player.body.setVelocity(0);
 
         if (this.moveKeys.left.isDown) {
-            this.player.setVelocityX(-160);
+            this.player.setVelocityX(-100);
         } else if (this.moveKeys.right.isDown) {
-            this.player.setVelocityX(160);
+            this.player.setVelocityX(100);
         }
 
         if (this.moveKeys.up.isDown) {
-            this.player.setVelocityY(-160);
+
+            this.player.setVelocityY(-100);
         } else if (this.moveKeys.down.isDown) {
-            this.player.setVelocityY(160);
+            this.player.setVelocityY(100);
         }
         this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
 
@@ -203,7 +220,7 @@ class ThirdScene extends Phaser.Scene {
     adjustEnemyMovement() {
         var angle = Phaser.Math.Angle.Between(this.enemy.x, this.enemy.y, this.player.x, this.player.y);
 
-        this.enemy.setVelocityX(Math.cos(angle) * 50);
+        this.enemy.setVelocityX(Math.cos(angle) * 150);
         this.enemy.setVelocityY(Math.sin(angle) * 50);
 
         this.enemy.rotation = angle;

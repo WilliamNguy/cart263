@@ -1,10 +1,10 @@
 class SecondScene extends Phaser.Scene {
     constructor() {
         super({ key: 'secondScene' });
-        this.dolphin = null;  // Define the dolphin as a class property
-        this.totalItems = 5; // Total number of item1 
+        this.dolphin = null;
+        this.totalItems = 3; // Total number need to be collected
         this.collectedItemsCount = 0;
-
+        this.itemCollisionCount = 0;
 
     }
 
@@ -48,14 +48,14 @@ class SecondScene extends Phaser.Scene {
             repeat: 5,
         });
         this.enemies.children.iterate((enemy) => {
-            const x = Phaser.Math.Between(50, 750); // Randomize x within the game width
-            const y = Phaser.Math.Between(100, 500); // Randomize y within the specified range
+            const x = Phaser.Math.Between(50, 750);
+            const y = Phaser.Math.Between(100, 500);
             enemy.setPosition(x, y);
             enemy.setDisplaySize(25, 25);
             enemy.setCollideWorldBounds(true);
-            enemy.setBounce(1);  // Make enemies bounce off boundaries
+            enemy.setBounce(1);
             enemy.play('turtle-moving');
-            this.randomizeEnemyMovement(enemy);  // Assign random initial movement
+            this.randomizeEnemyMovement(enemy);
 
             enemy.rotation = Phaser.Math.FloatBetween(0, 2 * Math.PI);
 
@@ -73,12 +73,12 @@ class SecondScene extends Phaser.Scene {
         const usableHeight = 600 - (marginTopBottom * 2);
         this.item2Group.children.iterate((item, index) => {
             const x = 50;
-            const y = Phaser.Math.Between(100, 500); // Ensuring Y is always below 600 and above 100
+            const y = Phaser.Math.Between(100, 500);
             item.setPosition(x, y);
             item.setDisplaySize(100, 50);
             item.setCollideWorldBounds(true);
-            item.setVelocityX(75); // Start moving right
-            item.setBounce(1, 1); // Bounce only horizontally
+            item.setVelocityX(75);
+            item.setBounce(1, 1); // Bounce horizontally and vertically
             item.play('dolphin-moving');
             this.randomizeDolphinMovement(item);
 
@@ -96,10 +96,7 @@ class SecondScene extends Phaser.Scene {
 
 
         this.physics.world.on('worldbounds', (body) => {
-            if (this.item2Group.contains(body.gameObject)) {
-                // Flip the dolphin when it hits the world bounds
-                body.gameObject.setFlipX(body.velocity.x < 0);
-            }
+
         });
 
 
@@ -172,7 +169,7 @@ class SecondScene extends Phaser.Scene {
         // Lock pointer on game canvas click
 
         this.isDragging = false;
-        this.dragSensitivity = 20;  // Define a sensible default
+        this.dragSensitivity = 30;
 
         this.input.on('pointerdown', () => {
             this.game.canvas.requestPointerLock();
@@ -211,21 +208,31 @@ class SecondScene extends Phaser.Scene {
         // Text for end screen message
         this.endMessage = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Hello', {
             fontSize: '40px',
-            color: '#ffffff', // White color for the text
+            color: '#ffffff', // White color 
             backgroundColor: '#000000', // Black background
-            padding: { left: 10, right: 10, top: 5, bottom: 5 } // Optional padding for better visibility
+            padding: { left: 10, right: 10, top: 5, bottom: 5 }
         })
             .setOrigin(0.5)
-            .setAlpha(0); // Initially invisible
+            .setAlpha(0);
 
         this.physics.add.collider(this.player, this.item2Group, this.playerHitsDolphin, null, this);
-        this.physics.add.collider(this.item1Group, this.item2Group, this.item1HitsDolphin, null, this);
+        // this.physics.add.collider(this.item1Group, this.item2Group, this.item1HitsDolphin, null, this);
         this.physics.add.overlap(this.item1Group, this.handleCollision, null, this);
-        this.physics.add.collider(this.enemies, this.item1Group, this.handleEnemyItemCollision, null, this);
-
+        // this.physics.add.collider(this.enemies, this.item1Group, this.handleEnemyItemCollision, null, this);
+        this.physics.add.overlap(this.item1Group, this.item2Group, this.handleItemCollision, null, this);
+        this.physics.add.overlap(this.item1Group, this.enemies, this.handleItemCollision, null, this);
     }
 
+    handleItemCollision(item1, other) {
+        // This method handles collisions between item1 and item2 or enemies
+        item1.disableBody(true, true);
+        other.disableBody(true, true);
+        this.itemCollisionCount++;
 
+        if (this.itemCollisionCount > 2) {
+            this.scene.start('failedScene2'); // Transition to the failed scene
+        }
+    }
     randomizeDolphinMovement(dolphin) {
         const speed = Phaser.Math.Between(50, 150); // Random speed
         const angle = Phaser.Math.FloatBetween(0, 2 * Math.PI); // Random angle
@@ -283,9 +290,9 @@ class SecondScene extends Phaser.Scene {
     }
     collectItem1(player, item1) {
         item1.disableBody(true, true);
-        this.displayCollectedItem(); // Display an icon for the collected item
+        this.displayCollectedItem();
 
-        if (this.collectedItemsCount >= this.totalItems) { // Fixed the condition to use the correct variable
+        if (this.collectedItemsCount >= this.totalItems) {
             this.endGame();
         }
     }
@@ -295,29 +302,27 @@ class SecondScene extends Phaser.Scene {
 
     handleEnemyItemCollision(enemy, item) {
         console.log('An enemy has collided with item1!');
-        // Add any specific logic here, for example:
-        enemy.disableBody(true, true); // This will disable and hide the enemy
-        item.disableBody(true, true);  // This could also disable and hide the item
+        enemy.disableBody(true, true);
+        item.disableBody(true, true);
     }
     endGame() {
-        // Once the required number of items are collected, go to the new scene
         this.scene.start('textScene3'); // Transition to a new scene
     }
     update() {
 
         this.player.body.setVelocity(0);
 
-        if (this.moveKeys.left.isDown) {
-            this.player.setVelocityX(-160);
-        } else if (this.moveKeys.right.isDown) {
-            this.player.setVelocityX(160);
-        }
+        // if (this.moveKeys.left.isDown) {
+        //     this.player.setVelocityX(-160);
+        // } else if (this.moveKeys.right.isDown) {
+        //     this.player.setVelocityX(160);
+        // }
 
-        if (this.moveKeys.up.isDown) {
-            this.player.setVelocityY(-160);
-        } else if (this.moveKeys.down.isDown) {
-            this.player.setVelocityY(160);
-        }
+        // if (this.moveKeys.up.isDown) {
+        //     this.player.setVelocityY(-160);
+        // } else if (this.moveKeys.down.isDown) {
+        //     this.player.setVelocityY(160);
+        // }
         this.player.rotation = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.reticle.x, this.reticle.y);
         if (this.player.x <= this.player.width / 2) {
             this.scene.start('thirdScene');  // Transition to ThirdScene
@@ -332,7 +337,7 @@ class SecondScene extends Phaser.Scene {
             }
         });
         this.item1Group.children.iterate(function (item) {
-            if (Phaser.Math.FloatBetween(0, 1) < 0.01) {  // Occasionally change direction
+            if (Phaser.Math.FloatBetween(0, 1) < 0.01) {
                 item.setVelocity(Phaser.Math.Between(-10, 10), Phaser.Math.Between(-10, 10));
             }
         });
@@ -341,10 +346,10 @@ class SecondScene extends Phaser.Scene {
             // Restrict dolphins to the specified y range
             if (dolphin.y < 100) {
                 dolphin.y = 100;
-                dolphin.setVelocityY(Math.abs(dolphin.body.velocity.y)); // Ensure positive velocity downwards
+                dolphin.setVelocityY(Math.abs(dolphin.body.velocity.y));
             } else if (dolphin.y > 500) {
                 dolphin.y = 500;
-                dolphin.setVelocityY(-Math.abs(dolphin.body.velocity.y)); // Ensure negative velocity upwards
+                dolphin.setVelocityY(-Math.abs(dolphin.body.velocity.y));
             }
         });
     }

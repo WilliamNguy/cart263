@@ -25,7 +25,7 @@ class Example extends Phaser.Scene {
         // Set world bounds
         this.physics.world.setBounds(100, 275, 1600, 920);
 
-        // Add 2 groups for Bullet objects
+
         this.playerBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
         this.enemyBullets = this.physics.add.group({ classType: Bullet, runChildUpdate: true });
 
@@ -54,6 +54,7 @@ class Example extends Phaser.Scene {
         let y = Phaser.Math.Between(275, 940);
         this.item1 = this.physics.add.sprite(x, y, 'item1')
         this.item1.setDisplaySize(48, 48);
+        this.item1.setCollideWorldBounds(true);
 
 
         this.item2 = this.physics.add.group({
@@ -67,7 +68,7 @@ class Example extends Phaser.Scene {
         });
 
         this.item2.children.iterate(item => {
-            item.setDisplaySize(75, 75); // Set the desired width and height
+            item.setDisplaySize(75, 75);
         });
 
         Phaser.Actions.RandomRectangle(this.item2.getChildren(), this.physics.world.bounds);
@@ -116,7 +117,7 @@ class Example extends Phaser.Scene {
         });
 
         this.crates.children.each(function (crate) {
-            const x = Phaser.Math.Between(130, 1620); // Random x position between 100 and 1620
+            const x = Phaser.Math.Between(130, 1620);
             const y = Phaser.Math.Between(295, 1150);
             crate.setPosition(x, y);
             crate.setDisplaySize(64, 64);
@@ -124,7 +125,7 @@ class Example extends Phaser.Scene {
         }, this);
 
         this.crates.children.iterate(crate => {
-            crate.setDisplaySize(64, 64); // Set the desired width and height
+            crate.setDisplaySize(64, 64);
         });
 
 
@@ -134,18 +135,17 @@ class Example extends Phaser.Scene {
         this.physics.add.collider(this.item2, this.crates, (item, crate) => {
         });
         this.physics.add.collider(this.item2, this.crate, (item, crate) => {
-            // Add bounce effect here if needed
+
         });
         this.physics.add.collider(this.playerBullets, this.crates, (bullet, crate) => {
-            bullet.destroy(); // Destroy bullet upon collision with crate
+            bullet.destroy(); // Destroy bullet when collisioning with crate
         });
 
         let hitCount = 0; // Track the number of hits
 
         this.physics.add.overlap(this.playerBullets, this.item1, (bullet, item1) => {
-            const newItem1 = this.add.sprite(50 + hitCount * 160, 0, 'item1'); // Create a new sprite at the top left corner
-            newItem1.setOrigin(0, 0);
-            hitCount++; // Increment hit count
+            const newItem1 = this.add.sprite(50 + hitCount * 160, 0, 'item1');
+            hitCount++; //hit count
         });
 
         this.reticle = this.physics.add.sprite(800, 700, 'target');
@@ -169,7 +169,7 @@ class Example extends Phaser.Scene {
         this.cameras.main.scrollX += 500;
         this.cameras.main.scrollY += 300;
 
-        // this.cameras.main.startFollow(this.player);
+
 
         // Creates object for input with WASD kets
         this.moveKeys = this.input.keyboard.addKeys({
@@ -274,9 +274,7 @@ class Example extends Phaser.Scene {
 
             this.player.setPosition(x, y);
         }
-        if (this.player.x <= 145) {
-            this.scene.start('secondScene');
-        }
+
     }
 
     enemyHitCallback(enemyHit, bulletHit) {
@@ -385,20 +383,13 @@ class Example extends Phaser.Scene {
         // End the game if 10 item1 have been hit
         this.item1Hits++;
         if (this.item1Hits >= 10) {
-            this.gameOver();
+            this.endGame();
         }
     }
 
-    gameOver() {
-        const rect = this.add.rectangle(800, 600, 2000, 2000, 0x000000);
-        rect.setAlpha(); // Set the transparency of the rectangle
-
-        // Add text on top of the black rectangle
-        const text = this.add.text(400, 300, 'Thanks for recycling', { fontFamily: 'Arial', fontSize: '32px', color: '#ffffff' });
-        text.setOrigin(0.5);
-
-        this.cameras.main.fadeIn(1000);
-
+    endGame() {
+        // Transition to another scene instead of showing an end screen
+        this.scene.start('textScene2');
     }
 
 

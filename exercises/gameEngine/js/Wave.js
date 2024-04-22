@@ -7,14 +7,14 @@ class Wave extends Phaser.GameObjects.Sprite {
         this.xSpeed = 0;
         this.ySpeed = 0;
         this.setSize(12, 12, true);
-        this.scene.add.existing(this); // Add the sprite to the scene
+        this.scene.add.existing(this); // Adding the sprite to the scene
     }
 
     fire(shooter, target, speed = 1) {
         this.setPosition(shooter.x, shooter.y); // Initial position
         this.direction = Math.atan((target.x - this.x) / (target.y - this.y));
 
-        // Calculate X and y velocity of bullet to moves it from shooter to target
+        // Calculating the X and y velocity of bullet to moves it from shooter to target
         if (target.y >= this.y) {
             this.xSpeed = speed * Math.sin(this.direction);
             this.ySpeed = speed * Math.cos(this.direction);
@@ -24,8 +24,8 @@ class Wave extends Phaser.GameObjects.Sprite {
             this.ySpeed = -speed * Math.cos(this.direction);
         }
 
-        this.rotation = shooter.rotation; // angle bullet with shooters rotation
-        this.born = 0; // Time since new bullet spawned
+        this.rotation = shooter.rotation; // rotate the bullet with rotation of player
+        this.born = 1;
         this.play('wave-moving');
 
     }

@@ -51,7 +51,7 @@ class Boot extends Phaser.Scene {
         this.load.image('item1', 'assets/images/bottle.png');
         this.load.image('item2', 'assets/images/fish.png');
         this.load.once('complete', () => {
-            this.scene.start('example');
+            this.scene.start('thirdScene');
         });
 
 
