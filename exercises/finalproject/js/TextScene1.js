@@ -16,7 +16,7 @@ class TextScene1 extends Phaser.Scene {
 
         let nextTextY = mainText.y + mainText.height + 20;
 
-        let missionText = this.add.text(this.cameras.main.centerX, nextTextY, 'Mission : Get rid of the bottle using your laser gun to disintegrate them. Optional : capture the person who is responsible for polluting. (He is wearing the same suit as you) ', {
+        let missionText = this.add.text(this.cameras.main.centerX, nextTextY, 'Mission : Get rid of the bottle using your laser gun to disintegrate them. ', {
             fontSize: '20px',
             color: '#FFFFFF',
             align: 'center',
@@ -25,7 +25,7 @@ class TextScene1 extends Phaser.Scene {
 
         let continueTextY = missionText.y + missionText.height + 20;
 
-        let optionalText = this.add.text(this.cameras.main.centerX, continueTextY, 'Optional : capture the person who is responsible for polluting. (He is wearing the same suit as you) ', {
+        let optionalText = this.add.text(this.cameras.main.centerX, continueTextY, 'Your supervisor is there, so be professional', {
             fontSize: '20px',
             color: '#FFFFFF',
             align: 'center',
